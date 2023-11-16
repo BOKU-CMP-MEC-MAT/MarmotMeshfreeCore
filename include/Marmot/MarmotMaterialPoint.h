@@ -48,6 +48,8 @@ public:
 
   virtual void initializeYourself() = 0;
 
+  virtual void prepareYourself(double timeNew, double dT ) = 0;
+
   virtual void computeYourself(double timeNew, double dT ) = 0;
 
   virtual StateView getStateView( const std::string& stateName) const = 0;
