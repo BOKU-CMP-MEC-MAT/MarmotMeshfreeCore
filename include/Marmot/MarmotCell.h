@@ -46,14 +46,13 @@ public:
 
   virtual std::string getCellShape() const = 0;
 
-  /* virtual void assignNodeCoordinates( const double* coordinates ) = 0; */
-
   virtual bool isCoordinateInCell( const double* coordinates ) const = 0;
 
   virtual void assignMaterialPoints( const std::vector< MarmotMaterialPoint* >& materialPoints ) = 0;
 
-  virtual void computeMaterialPointKernels( double* residual,
-                                            double* dResidual_dQ,
+  virtual void computeMaterialPointKernels( double* Q, 
+                                            double* rhs,
+                                            double* dRhs_dQ,
                                             double  timeNew,
                                             double  dT ) const = 0;
 
