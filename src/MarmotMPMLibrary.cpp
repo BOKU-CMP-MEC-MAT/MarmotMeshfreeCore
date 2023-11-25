@@ -1,6 +1,6 @@
+#include "Marmot/MarmotMPMLibrary.h"
 #include "Marmot/MarmotCell.h"
 #include "Marmot/MarmotJournal.h"
-#include "Marmot/MarmotMPMLibrary.h"
 #include "Marmot/MarmotMaterialPoint.h"
 #include <algorithm>
 #include <cassert>
@@ -9,23 +9,17 @@
 #include <tuple>
 #include <unordered_map>
 
-
-
 namespace MarmotLibrary {
 
-  std::string makeStringUpperCase(const std::string& str){
-    std::string strUpperCase = str; 
-
+  std::string makeStringUpperCase( const std::string& str )
+  {
+    std::string strUpperCase = str;
 
     // TODO: MOVE TO MarmotUtils or similar
 
-    std::transform( 
-            strUpperCase.begin(), 
-            strUpperCase.end(), 
-            strUpperCase.begin(), toupper );
+    std::transform( strUpperCase.begin(), strUpperCase.end(), strUpperCase.begin(), toupper );
 
     return strUpperCase;
-
   }
 
   // MaterialPointFactory
@@ -33,15 +27,14 @@ namespace MarmotLibrary {
   std::unordered_map< std::string, MarmotMaterialPointFactory::materialPointFactoryFunction >
     MarmotMaterialPointFactory::materialPointFactoryFunctionByName;
 
-
-
   bool MarmotMaterialPointFactory::registerMaterialPoint( const std::string&           materialPointName,
                                                           materialPointFactoryFunction factoryFunction )
   {
 
-    const auto materialPointNameUpperCase = makeStringUpperCase(materialPointName);
+    const auto materialPointNameUpperCase = makeStringUpperCase( materialPointName );
 
-    assert( materialPointFactoryFunctionByName.find( materialPointNameUpperCase ) == materialPointFactoryFunctionByName.end() );
+    assert( materialPointFactoryFunctionByName.find( materialPointNameUpperCase ) ==
+            materialPointFactoryFunctionByName.end() );
 
     materialPointFactoryFunctionByName[materialPointNameUpperCase] = factoryFunction;
 
@@ -50,22 +43,19 @@ namespace MarmotLibrary {
 
   MarmotMaterialPoint* MarmotMaterialPointFactory::createMaterialPoint( const std::string& materialPointName,
                                                                         int                materialPointNumber,
-                                                                        const double* vertexCoordinates,
-                                                                        int sizeVertexCoordinates, 
-                                                                        double volume
-                                                                        /* const MarmotMaterialSection& material */ 
-                                                                        )
+                                                                        const double*      vertexCoordinates,
+                                                                        int                sizeVertexCoordinates,
+                                                                        double             volume
+                                                                        /* const MarmotMaterialSection& material */
+  )
   {
-    const auto materialPointNameUpperCase = makeStringUpperCase(materialPointName);
+    const auto materialPointNameUpperCase = makeStringUpperCase( materialPointName );
 
     try {
-      return materialPointFactoryFunctionByName.at( materialPointNameUpperCase )( 
-              materialPointNumber, 
-              vertexCoordinates,
-              sizeVertexCoordinates,
-              volume
-              /* material */
-              );
+      return materialPointFactoryFunctionByName.at(
+        materialPointNameUpperCase )( materialPointNumber, vertexCoordinates, sizeVertexCoordinates, volume
+                                      /* material */
+      );
     }
     catch ( const std::out_of_range& e ) {
       throw std::invalid_argument( MakeString() << "Invalid materialPoint " << materialPointName << " requested!" );
@@ -80,7 +70,7 @@ namespace MarmotLibrary {
   bool MarmotCellFactory::registerCell( const std::string& cellName, cellFactoryFunction factoryFunction )
   {
 
-    const auto cellNameUpperCase = makeStringUpperCase(cellName);
+    const auto cellNameUpperCase = makeStringUpperCase( cellName );
 
     assert( cellFactoryFunctionByName.find( cellNameUpperCase ) == cellFactoryFunctionByName.end() );
 
@@ -89,18 +79,15 @@ namespace MarmotLibrary {
     return true;
   }
 
-  MarmotCell* MarmotCellFactory::createCell( const std::string& cellName, 
-          int cellNumber, 
-          const double* nodeCoordinates, 
-          int sizeNodeCoordinates)
+  MarmotCell* MarmotCellFactory::createCell( const std::string& cellName,
+                                             int                cellNumber,
+                                             const double*      nodeCoordinates,
+                                             int                sizeNodeCoordinates )
   {
-    const auto cellNameUpperCase = makeStringUpperCase(cellName);
+    const auto cellNameUpperCase = makeStringUpperCase( cellName );
 
     try {
-      return cellFactoryFunctionByName.at( cellNameUpperCase )( 
-              cellNumber,
-              nodeCoordinates,
-              sizeNodeCoordinates);
+      return cellFactoryFunctionByName.at( cellNameUpperCase )( cellNumber, nodeCoordinates, sizeNodeCoordinates );
     }
     catch ( const std::out_of_range& e ) {
       throw std::invalid_argument( MakeString() << "Invalid cell " << cellName << " requested!" );

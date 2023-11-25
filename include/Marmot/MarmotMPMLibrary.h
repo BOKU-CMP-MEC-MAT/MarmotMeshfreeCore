@@ -42,23 +42,23 @@ namespace MarmotLibrary {
 
   class MarmotMaterialPointFactory {
   public:
-    using materialPointFactoryFunction = MarmotMaterialPoint* (*)( int                          materialPointNumber,
-                                                                   const double*                vertexCoordinates,
-                                                                   int                          sizeVertexCoordinates,
-                                                                   double                       volume
-                                                                   /* const MarmotMaterialSection& material */ 
-                                                                   );
+    using materialPointFactoryFunction = MarmotMaterialPoint* (*)( int           materialPointNumber,
+                                                                   const double* vertexCoordinates,
+                                                                   int           sizeVertexCoordinates,
+                                                                   double        volume
+                                                                   /* const MarmotMaterialSection& material */
+    );
     MarmotMaterialPointFactory()       = delete;
 
-    static MarmotMaterialPoint* createMaterialPoint( const std::string&           materialPointName,
-                                                     int                          materialNumber,
-                                                     const double*                vertexCoordinates,
-                                                     int                          sizeVertexCoordinates,
-                                                     double                       volume
+    static MarmotMaterialPoint* createMaterialPoint( const std::string& materialPointName,
+                                                     int                materialNumber,
+                                                     const double*      vertexCoordinates,
+                                                     int                sizeVertexCoordinates,
+                                                     double             volume
                                                      /* const MarmotMaterialSection& material */
-                                                     );
+    );
 
-    static bool registerMaterialPoint( const std::string& materialName, materialPointFactoryFunction factoryFunction);
+    static bool registerMaterialPoint( const std::string& materialName, materialPointFactoryFunction factoryFunction );
 
   private:
     bool checkIfMaterialPointIsRegistered( const std::string& materialPointName );
@@ -66,23 +66,27 @@ namespace MarmotLibrary {
     static std::unordered_map< std::string, materialPointFactoryFunction > materialPointFactoryFunctionByName;
   };
 
+  // CellFactory
+  //
+  // - Allows cells to register themselve with their name
+  // - Allows the user to create instances of cells
 
-// CellFactory
-//
-// - Allows cells to register themselve with their name
-// - Allows the user to create instances of cells
+  class MarmotCellFactory {
+  public:
+    using cellFactoryFunction = MarmotCell* (*)( int           cellNumber,
+                                                 const double* vertexCoordinates,
+                                                 int           sizeVertexCoordinates );
+    MarmotCellFactory()       = delete;
 
-class MarmotCellFactory {
-public:
-  using cellFactoryFunction = MarmotCell* (*)( int cellNumber, const double* vertexCoordinates, int sizeVertexCoordinates);
-  MarmotCellFactory()       = delete;
+    static MarmotCell* createCell( const std::string& cellName,
+                                   int                cellNumber,
+                                   const double*      nodeCoordinates,
+                                   int                sizeNodeCoordinates );
 
-  static MarmotCell* createCell( const std::string& cellName, int cellNumber, const double* nodeCoordinates, int sizeNodeCoordinates);
+    static bool registerCell( const std::string& cellName, cellFactoryFunction factoryFunction );
 
-  static bool registerCell( const std::string& cellName, cellFactoryFunction factoryFunction );
-
-private:
-  static std::unordered_map< std::string, cellFactoryFunction > cellFactoryFunctionByName;
-};
+  private:
+    static std::unordered_map< std::string, cellFactoryFunction > cellFactoryFunctionByName;
+  };
 
 } // namespace MarmotLibrary

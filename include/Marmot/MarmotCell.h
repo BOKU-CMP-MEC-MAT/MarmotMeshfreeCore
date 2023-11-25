@@ -50,18 +50,16 @@ public:
 
   virtual void assignMaterialPoints( const std::vector< MarmotMaterialPoint* >& materialPoints ) = 0;
 
-  virtual void computeMaterialPointKernels( double* Q, 
-                                            double* rhs,
-                                            double* dRhs_dQ,
-                                            double  timeNew,
-                                            double  dT ) const = 0;
+  virtual void computeMaterialPointKernels( const double* Q,
+                                            double*       fInt,
+                                            double*       dFInt_dQ,
+                                            double        timeNew,
+                                            double        dT ) const = 0;
 
-  virtual void computeBodyLoad( int           type,
-                                const double* load,
-                                double*       residual,
-                                double*       dResidual_dQ,
-                                double        timeNew,
-                                double        dT ) const = 0;
+  virtual void computeBodyLoad( int type, const double* load, double* fExt, double* dExt_dQ, double timeNew, double dT )
+    const = 0;
+
+  virtual void getInterpolationVector( double* vec, const double* coordinates ) const = 0;
 
   virtual const std::unordered_map< std::string, int >& getSupportedBodyLoadTypes() const = 0;
 

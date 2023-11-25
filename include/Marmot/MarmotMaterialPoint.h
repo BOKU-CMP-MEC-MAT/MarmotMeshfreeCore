@@ -26,17 +26,15 @@
  * ---------------------------------------------------------------------
  */
 #pragma once
-#include "Marmot/MarmotUtils.h"
 #include "Marmot/MarmotElementProperty.h"
+#include "Marmot/MarmotUtils.h"
 #include <string>
 #include <vector>
 
 class MarmotMaterialPoint {
 
 public:
-
-  virtual ~MarmotMaterialPoint() {};
-
+  virtual ~MarmotMaterialPoint(){};
 
   /* virtual void assignVertexCoordinates( const double* coordinates ) = 0; */
 
@@ -48,16 +46,15 @@ public:
 
   virtual void initializeYourself() = 0;
 
-  virtual void prepareYourself(double timeNew, double dT ) = 0;
+  virtual void prepareYourself( double timeNew, double dT ) = 0;
 
-  virtual void computeYourself(double timeNew, double dT ) = 0;
+  virtual void computeYourself( double timeNew, double dT ) = 0;
 
-  virtual StateView getStateView( const std::string& stateName) const = 0;
+  virtual StateView getStateView( const std::string& stateName ) const = 0;
 
   virtual int getNumberOfRequiredStateVars() const = 0;
 
-  virtual void getCoordinatesAtCenter(double* coordinates) const = 0;
-
+  virtual void getCoordinatesAtCenter( double* coordinates ) const = 0;
 
   virtual int getDimension() const = 0;
 
@@ -65,9 +62,7 @@ public:
 
   virtual std::string getMaterialPointShape() const = 0;
 
-
-  virtual void getVertexCoordinates(double* coordinates) const = 0;
+  virtual void getVertexCoordinates( double* coordinates ) const = 0;
 
   virtual double getVolume() const = 0;
-
 };
