@@ -76,17 +76,34 @@ namespace MarmotLibrary {
     using cellFactoryFunction = MarmotCell* (*)( int           cellNumber,
                                                  const double* vertexCoordinates,
                                                  int           sizeVertexCoordinates );
-    MarmotCellFactory()       = delete;
+
+    using bSplineCellFactoryFunction = MarmotCell* (*)( int           cellNumber,
+                                                        const double* vertexCoordinates,
+                                                        int           sizeVertexCoordinates,
+                                                        const double* knotVector,
+                                                        int           sizeKnotVector
+
+    );
+    MarmotCellFactory()              = delete;
 
     static MarmotCell* createCell( const std::string& cellName,
                                    int                cellNumber,
                                    const double*      nodeCoordinates,
                                    int                sizeNodeCoordinates );
 
+    static MarmotCell* createBSplineCell( const std::string& cellName,
+                                          int                cellNumber,
+                                          const double*      nodeCoordinates,
+                                          int                sizeNodeCoordinates,
+                                          const double*      knotVector,
+                                          int                sizeKnotVector );
+
     static bool registerCell( const std::string& cellName, cellFactoryFunction factoryFunction );
+    static bool registerBSplineCell( const std::string& cellName, bSplineCellFactoryFunction factoryFunction );
 
   private:
-    static std::unordered_map< std::string, cellFactoryFunction > cellFactoryFunctionByName;
+    static std::unordered_map< std::string, cellFactoryFunction >        cellFactoryFunctionByName;
+    static std::unordered_map< std::string, bSplineCellFactoryFunction > bSplineCellFactoryFunctionByName;
   };
 
 } // namespace MarmotLibrary
