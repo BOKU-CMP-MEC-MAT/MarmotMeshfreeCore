@@ -63,13 +63,13 @@ concept GeometryCellPolicy = requires( GeometryCellImpl geom ) {
   typename GeometryCellImpl::dNdXSized;
   requires std::same_as< typename GeometryCellImpl::dNdXSized, typename Eigen::Matrix< double, nDim, nNodes > >;
 
-  {
-    geom.test( typename GeometryCellImpl::XiSized() )
-  } -> std::same_as< bool >;
+  /* { */
+  /*   geom.test( typename GeometryCellImpl::XiSized() ) */
+  /* } -> std::same_as< bool >; */
 
-  {
-    geom.isCoordinateInCell( typename GeometryCellImpl::XiSized() )
-  } -> std::same_as< bool >;
+  /* { */
+  /*   geom.isCoordinateInCell( typename GeometryCellImpl::XiSized() ) */
+  /* } -> std::same_as< bool >; */
 
   {
     geom.findReferenceCoordinate( typename GeometryCellImpl::XiSized() )

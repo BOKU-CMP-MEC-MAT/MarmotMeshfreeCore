@@ -80,10 +80,9 @@ namespace MarmotLibrary {
     using bSplineCellFactoryFunction = MarmotCell* (*)( int           cellNumber,
                                                         const double* vertexCoordinates,
                                                         int           sizeVertexCoordinates,
-                                                        const double* knotVector,
-                                                        int           sizeKnotVector
+                                                        const double* knotVectors,
+                                                        int           sizeKnotVectors);
 
-    );
     MarmotCellFactory()              = delete;
 
     static MarmotCell* createCell( const std::string& cellName,
@@ -95,8 +94,8 @@ namespace MarmotLibrary {
                                           int                cellNumber,
                                           const double*      nodeCoordinates,
                                           int                sizeNodeCoordinates,
-                                          const double*      knotVector,
-                                          int                sizeKnotVector );
+                                          const double*     knotVectors,
+                                          int                sizeKnotVectors );
 
     static bool registerCell( const std::string& cellName, cellFactoryFunction factoryFunction );
     static bool registerBSplineCell( const std::string& cellName, bSplineCellFactoryFunction factoryFunction );

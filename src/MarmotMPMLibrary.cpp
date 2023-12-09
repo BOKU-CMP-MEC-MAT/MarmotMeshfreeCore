@@ -163,14 +163,14 @@ namespace MarmotLibrary {
                                                     int                cellNumber,
                                                     const double*      nodeCoordinates,
                                                     int                sizeNodeCoordinates,
-                                                    const double*      knotVector,
-                                                    int                sizeKnotVector )
+                                                    const double*     knotVectors,
+                                                    int                sizeKnotVectors )
   {
     const auto cellNameUpperCase = makeStringUpperCase( cellName );
 
     try {
       return bSplineCellFactoryFunctionByName.at(
-        cellNameUpperCase )( cellNumber, nodeCoordinates, sizeNodeCoordinates, knotVector, sizeKnotVector );
+        cellNameUpperCase )( cellNumber, nodeCoordinates, sizeNodeCoordinates, knotVectors, sizeKnotVectors );
     }
     catch ( const std::out_of_range& e ) {
       throw std::invalid_argument( MakeString() << "Invalid cell " << cellName << " requested!" );
