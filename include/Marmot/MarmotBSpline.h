@@ -25,6 +25,7 @@
  * ---------------------------------------------------------------------
  */
 #pragma once
+#include <cmath>
 
 template < int p >
 double B( double u, const double* knotVec, int i )
@@ -32,9 +33,9 @@ double B( double u, const double* knotVec, int i )
   const auto& z = knotVec;
   return
     // clang-format off
-      ( ( z[p+i]   - z[i] )  != 0 ? ( u        - z[i] ) / (z[p+i] - z[i]     ) * B<p-1>(u, z, i)  : 0 )
+      std::abs( ( z[p+i]   - z[i] )  >= 1e-14 ? ( u        - z[i] ) / (z[p+i] - z[i]     ) * B<p-1>(u, z, i)  : 0 )
       +
-      ( ( z[p+i+1] - z[i+1]) != 0 ? ( z[i+p+1] - u    ) / (z[p+i+1] - z[i+1] ) * B<p-1>(u, z, i+1) : 0 )
+      std::abs( ( z[p+i+1] - z[i+1]) >= 1e-14 ? ( z[i+p+1] - u    ) / (z[p+i+1] - z[i+1] ) * B<p-1>(u, z, i+1) : 0 )
       ;
   // clang-format on
 }
@@ -45,13 +46,13 @@ double dB_dU( double u, const double* knotVec, int i )
   const auto& z = knotVec;
   return
     // clang-format off
-      ( ( z[p+i]   - z[i] )  != 0 ? 
+      ( std::abs( z[p+i]   - z[i] )  >= 1e-14 ? 
         ( 1               ) / (z[p+i] - z[i]     ) * B<p-1>(u, z, i)  +
         ( u        - z[i] ) / (z[p+i] - z[i]     ) * dB_dU<p-1>(u, z, i)  
 
         : 0 )
       +
-      ( ( z[p+i+1] - z[i+1]) != 0 ? 
+      ( std::abs( z[p+i+1] - z[i+1]) >= 1e-14 ? 
         (          - 1    ) / (z[p+i+1] - z[i+1] ) * B<p-1>(u, z, i+1) +
         ( z[i+p+1] - u    ) / (z[p+i+1] - z[i+1] ) * dB_dU<p-1>(u, z, i+1) 
         : 0 )
@@ -62,7 +63,7 @@ double dB_dU( double u, const double* knotVec, int i )
 template <>
 double inline B< 0 >( double u, const double* knotVec, int i )
 {
-  if ( knotVec[i] <= u && u <= knotVec[i + 1] )
+  if ( knotVec[i] <= u && u < knotVec[i + 1] )
     return 1;
   return 0;
 }
