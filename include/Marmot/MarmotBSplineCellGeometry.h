@@ -69,6 +69,8 @@ namespace Marmot::Cells {
 
     bool isCoordinateInCell( const double* coordinates ) const;
 
+    void getBoundingBox( double* boundingBoxMin, double* boundingBoxMax) const;
+
     XiSized findReferenceCoordinate( const XiSized& coord ) const;
 
     NSized N( const XiSized& xi ) const { return ParentBSplineGeometryElement::N( xi ); }
@@ -96,6 +98,13 @@ namespace Marmot::Cells {
 
     return true;
   }
+
+template < int nDim, int nNodes >
+void MarmotBSplineCellGeometry< nDim, nNodes >::getBoundingBox( double* boundingBoxMin, double* boundingBoxMax) const
+{
+    (Eigen::Map<XiSized>(boundingBoxMin)) = _boundingBoxMin;
+    (Eigen::Map<XiSized>(boundingBoxMax)) = _boundingBoxMax;
+}
 
   template < int nDim, int order >
   MarmotBSplineCellGeometry< nDim, order >::XiSized MarmotBSplineCellGeometry< nDim, order >::findReferenceCoordinate(

@@ -48,6 +48,8 @@ public:
 
   virtual bool isCoordinateInCell( const double* coordinates ) const = 0;
 
+  virtual void getBoundingBox( double* boundingBoxMin, double* boundingBoxMax) const = 0;
+
   virtual void assignMaterialPoints( const std::vector< MarmotMaterialPoint* >& materialPoints ) = 0;
 
   virtual void computeMaterialPointKernels( const double* Q,
