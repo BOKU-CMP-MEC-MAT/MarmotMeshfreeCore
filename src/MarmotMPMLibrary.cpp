@@ -163,7 +163,7 @@ namespace MarmotLibrary {
                                                     int                cellNumber,
                                                     const double*      nodeCoordinates,
                                                     int                sizeNodeCoordinates,
-                                                    const double*     knotVectors,
+                                                    const double*      knotVectors,
                                                     int                sizeKnotVectors )
   {
     const auto cellNameUpperCase = makeStringUpperCase( cellName );

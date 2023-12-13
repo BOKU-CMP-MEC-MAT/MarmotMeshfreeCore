@@ -48,7 +48,7 @@ public:
 
   virtual bool isCoordinateInCell( const double* coordinates ) const = 0;
 
-  virtual void getBoundingBox( double* boundingBoxMin, double* boundingBoxMax) const = 0;
+  virtual void getBoundingBox( double* boundingBoxMin, double* boundingBoxMax ) const = 0;
 
   virtual void assignMaterialPoints( const std::vector< MarmotMaterialPoint* >& materialPoints ) = 0;
 
@@ -61,9 +61,20 @@ public:
   virtual void computeBodyLoad( int type, const double* load, double* fExt, double* dExt_dQ, double timeNew, double dT )
     const = 0;
 
+  virtual void computeDistributedLoad( int           type,
+                                       int           surfaceID,
+                                       int           materialPointNumber,
+                                       const double* load,
+                                       double*       fExt,
+                                       double*       dExt_dQ,
+                                       double        timeNew,
+                                       double        dT ) const = 0;
+
   virtual void getInterpolationVector( double* vec, const double* coordinates ) const = 0;
 
   virtual const std::unordered_map< std::string, int >& getSupportedBodyLoadTypes() const = 0;
+
+  virtual const std::unordered_map< std::string, int >& getSupportedDistributedLoadTypes() const = 0;
 
   virtual void interpolateFieldsToMaterialPoints( const double* Q ) const = 0;
 };

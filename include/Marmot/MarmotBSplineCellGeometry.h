@@ -51,25 +51,25 @@ namespace Marmot::Cells {
     using CoordinateVector = ParentBSplineGeometryElement::CoordinateVector;
     using XiSized          = ParentBSplineGeometryElement::XiSized;
 
-    MarmotBSplineCellGeometry( const double*  nodeCoordinates,
-                               int            sizeNodeCoordinates,
+    MarmotBSplineCellGeometry( const double* nodeCoordinates,
+                               int           sizeNodeCoordinates,
                                const double* knotVectors,
-                               int            sizeKnotVectors )
+                               int           sizeKnotVectors )
       : ParentBSplineGeometryElement( nodeCoordinates, sizeNodeCoordinates, knotVectors, sizeKnotVectors )
     {
-        auto nodeCoords = ParentBSplineGeometryElement::_mapCoordinates.reshaped( nDim, this->nNodes );
+      auto nodeCoords = ParentBSplineGeometryElement::_mapCoordinates.reshaped( nDim, this->nNodes );
 
       /* _boundingBoxMin = nodeCoords.rowwise().minCoeff(); */
       /* _boundingBoxMax = nodeCoords.rowwise().maxCoeff(); */
-      _boundingBoxMin = this->_knotVectors.row(order);
-      _boundingBoxMax = this->_knotVectors.row(this->nKnotsPerDir - order - 1);
+      _boundingBoxMin = this->_knotVectors.row( order );
+      _boundingBoxMax = this->_knotVectors.row( this->nKnotsPerDir - order - 1 );
 
       _boundingBoxMatchesGeometryExactly = true;
     }
 
     bool isCoordinateInCell( const double* coordinates ) const;
 
-    void getBoundingBox( double* boundingBoxMin, double* boundingBoxMax) const;
+    void getBoundingBox( double* boundingBoxMin, double* boundingBoxMax ) const;
 
     XiSized findReferenceCoordinate( const XiSized& coord ) const;
 
@@ -77,7 +77,7 @@ namespace Marmot::Cells {
 
     dNdXSized dNdX( const XiSized& xi ) const
     {
-      const auto          dN_dXi = ParentBSplineGeometryElement::dNdXi( xi );
+      const auto dN_dXi = ParentBSplineGeometryElement::dNdXi( xi );
       return dN_dXi;
     }
 
@@ -99,12 +99,12 @@ namespace Marmot::Cells {
     return true;
   }
 
-template < int nDim, int nNodes >
-void MarmotBSplineCellGeometry< nDim, nNodes >::getBoundingBox( double* boundingBoxMin, double* boundingBoxMax) const
-{
-    (Eigen::Map<XiSized>(boundingBoxMin)) = _boundingBoxMin;
-    (Eigen::Map<XiSized>(boundingBoxMax)) = _boundingBoxMax;
-}
+  template < int nDim, int nNodes >
+  void MarmotBSplineCellGeometry< nDim, nNodes >::getBoundingBox( double* boundingBoxMin, double* boundingBoxMax ) const
+  {
+    ( Eigen::Map< XiSized >( boundingBoxMin ) ) = _boundingBoxMin;
+    ( Eigen::Map< XiSized >( boundingBoxMax ) ) = _boundingBoxMax;
+  }
 
   template < int nDim, int order >
   MarmotBSplineCellGeometry< nDim, order >::XiSized MarmotBSplineCellGeometry< nDim, order >::findReferenceCoordinate(
@@ -114,14 +114,15 @@ void MarmotBSplineCellGeometry< nDim, nNodes >::getBoundingBox( double* bounding
     /* XiSized xi = 2 * ( coord - ( _boundingBoxMax + _boundingBoxMin ) / 2 ) */
     /*                    .cwiseProduct( ( _boundingBoxMax - _boundingBoxMin ).cwiseInverse() ); */
 
-      return coord;
+    return coord;
 
-/*     std::cout << "coord " << coord.transpose() << std::endl; */
-/*     std::cout << "initial guess " << xi.transpose() << std::endl; */
-/*     std::cout << "bb " << _boundingBoxMin.transpose() << std::endl; */
-/*     std::cout << "bb " << _boundingBoxMax.transpose() << std::endl; */
+    /*     std::cout << "coord " << coord.transpose() << std::endl; */
+    /*     std::cout << "initial guess " << xi.transpose() << std::endl; */
+    /*     std::cout << "bb " << _boundingBoxMin.transpose() << std::endl; */
+    /*     std::cout << "bb " << _boundingBoxMax.transpose() << std::endl; */
 
-    /* XiSized r = coord - ParentBSplineGeometryElement::_mapCoordinates.reshaped(nDim, this->nNodes) * N( xi ).transpose(); */
+    /* XiSized r = coord - ParentBSplineGeometryElement::_mapCoordinates.reshaped(nDim, this->nNodes) * N( xi
+     * ).transpose(); */
 
     /* int nCounter = 0; */
     /* while ( r.norm() / coord.norm() >= 1e-12 ) { */
@@ -129,7 +130,8 @@ void MarmotBSplineCellGeometry< nDim, nNodes >::getBoundingBox( double* bounding
     /*   // TODO */
     /*   /1* xi += *1/ */
 
-    /*   r = coord - ParentBSplineGeometryElement::_mapCoordinates.reshaped(nDim, this->nNodes) * N( xi ).transpose(); */
+    /*   r = coord - ParentBSplineGeometryElement::_mapCoordinates.reshaped(nDim, this->nNodes) * N( xi ).transpose();
+     */
     /*   nCounter++; */
     /*   if ( nCounter >= 5 ) { */
     /*     throw std::runtime_error( MakeString() */

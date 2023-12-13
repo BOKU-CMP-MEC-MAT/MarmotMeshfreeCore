@@ -36,10 +36,6 @@ class MarmotMaterialPoint {
 public:
   virtual ~MarmotMaterialPoint(){};
 
-  /* virtual void assignVertexCoordinates( const double* coordinates ) = 0; */
-
-  /* virtual void assignVolume( double volume ) = 0; */
-
   virtual void assignStateVars( double* stateVars, int nStateVars ) = 0;
 
   virtual void assignMaterial( const MarmotMaterialSection& material ) = 0;
@@ -55,6 +51,8 @@ public:
   virtual int getNumberOfRequiredStateVars() const = 0;
 
   virtual void getCoordinatesAtCenter( double* coordinates ) const = 0;
+
+  virtual int getMaterialPointNumber() const = 0;
 
   virtual int getDimension() const = 0;
 

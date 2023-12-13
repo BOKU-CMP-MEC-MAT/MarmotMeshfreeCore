@@ -62,7 +62,7 @@ public:
 
   bool isCoordinateInCell( const double* coordinates ) const;
 
-  void getBoundingBox( double* boundingBoxMin, double* boundingBoxMax) const;
+  void getBoundingBox( double* boundingBoxMin, double* boundingBoxMax ) const;
 
   XiSized findReferenceCoordinate( const XiSized& coord ) const;
 
@@ -98,12 +98,12 @@ bool MarmotLagrangianCellGeometry< nDim, nNodes >::isCoordinateInCell( const dou
 }
 
 template < int nDim, int nNodes >
-void MarmotLagrangianCellGeometry< nDim, nNodes >::getBoundingBox( double* boundingBoxMin, double* boundingBoxMax) const
+void MarmotLagrangianCellGeometry< nDim, nNodes >::getBoundingBox( double* boundingBoxMin,
+                                                                   double* boundingBoxMax ) const
 {
-    (Eigen::Map<XiSized>(boundingBoxMin)) = _boundingBoxMin;
-    (Eigen::Map<XiSized>(boundingBoxMax)) = _boundingBoxMax;
+  ( Eigen::Map< XiSized >( boundingBoxMin ) ) = _boundingBoxMin;
+  ( Eigen::Map< XiSized >( boundingBoxMax ) ) = _boundingBoxMax;
 }
-
 
 template < int nDim, int nNodes >
 MarmotLagrangianCellGeometry< nDim, nNodes >::XiSized MarmotLagrangianCellGeometry< nDim, nNodes >::

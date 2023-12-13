@@ -81,9 +81,9 @@ namespace MarmotLibrary {
                                                         const double* vertexCoordinates,
                                                         int           sizeVertexCoordinates,
                                                         const double* knotVectors,
-                                                        int           sizeKnotVectors);
+                                                        int           sizeKnotVectors );
 
-    MarmotCellFactory()              = delete;
+    MarmotCellFactory() = delete;
 
     static MarmotCell* createCell( const std::string& cellName,
                                    int                cellNumber,
@@ -94,7 +94,7 @@ namespace MarmotLibrary {
                                           int                cellNumber,
                                           const double*      nodeCoordinates,
                                           int                sizeNodeCoordinates,
-                                          const double*     knotVectors,
+                                          const double*      knotVectors,
                                           int                sizeKnotVectors );
 
     static bool registerCell( const std::string& cellName, cellFactoryFunction factoryFunction );
