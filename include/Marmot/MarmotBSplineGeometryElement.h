@@ -70,34 +70,33 @@ namespace Marmot::FiniteElement {
 
     NSized N( const XiSized& xi ) const
     {
-      NSized N_;
+      NSized        N_;
       constexpr int nN = order + 1;
 
       if constexpr ( nDim == 1 )
-        for ( int p = 0; p < nN ; p++ )
+        for ( int p = 0; p < nN; p++ )
           N_( p ) = B< order >( xi( 0 ), this->_knotVectorsNormalized.col( 0 ).data(), p );
 
       else if constexpr ( nDim == 2 )
-        for ( int q = 0; q < nN ; q++ )
-          for ( int p = 0; p < nN ; p++ )
+        for ( int q = 0; q < nN; q++ )
+          for ( int p = 0; p < nN; p++ )
             N_( p + q * ( nN ) ) = B< order >( xi( 0 ), this->_knotVectorsNormalized.col( 0 ).data(), p ) *
-                                          B< order >( xi( 1 ), this->_knotVectorsNormalized.col( 1 ).data(), q );
+                                   B< order >( xi( 1 ), this->_knotVectorsNormalized.col( 1 ).data(), q );
 
       else if constexpr ( nDim == 3 )
         for ( int r = 0; r < nN; r++ )
           for ( int q = 0; q < nN; q++ )
             for ( int p = 0; p < nN; p++ )
-              N_( p + q * nN +
-                  r * nN * nN ) = B< order >( xi( 0 ), this->_knotVectorsNormalized.col( 0 ).data(), p ) *
-                                        B< order >( xi( 1 ), this->_knotVectorsNormalized.col( 1 ).data(), q ) *
-                                        B< order >( xi( 2 ), this->_knotVectorsNormalized.col( 2 ).data(), r );
+              N_( p + q * nN + r * nN * nN ) = B< order >( xi( 0 ), this->_knotVectorsNormalized.col( 0 ).data(), p ) *
+                                               B< order >( xi( 1 ), this->_knotVectorsNormalized.col( 1 ).data(), q ) *
+                                               B< order >( xi( 2 ), this->_knotVectorsNormalized.col( 2 ).data(), r );
 
       return N_;
     }
 
     dNdXSized dNdXi( const XiSized& xi ) const
     {
-      dNdXSized dN_dXi_;
+      dNdXSized     dN_dXi_;
       constexpr int nN = order + 1;
 
       if constexpr ( nDim == 1 )
@@ -106,14 +105,11 @@ namespace Marmot::FiniteElement {
 
       else if constexpr ( nDim == 2 )
         for ( int q = 0; q < nN; q++ )
-          for ( int p = 0; p <nN ; p++ ) {
-            dN_dXi_( 0,
-                     p + q * nN ) = dB_dU< order >( xi( 0 ), this->_knotVectorsNormalized.col( 0 ).data(), p ) *
+          for ( int p = 0; p < nN; p++ ) {
+            dN_dXi_( 0, p + q * nN ) = dB_dU< order >( xi( 0 ), this->_knotVectorsNormalized.col( 0 ).data(), p ) *
                                        B< order >( xi( 1 ), this->_knotVectorsNormalized.col( 1 ).data(), q );
-            dN_dXi_( 1,
-                     p +
-                       q * nN ) = B< order >( xi( 0 ), this->_knotVectorsNormalized.col( 0 ).data(), p ) *
-                                             dB_dU< order >( xi( 1 ), this->_knotVectorsNormalized.col( 1 ).data(), q );
+            dN_dXi_( 1, p + q * nN ) = B< order >( xi( 0 ), this->_knotVectorsNormalized.col( 0 ).data(), p ) *
+                                       dB_dU< order >( xi( 1 ), this->_knotVectorsNormalized.col( 1 ).data(), q );
           }
 
       else if constexpr ( nDim == 3 )
@@ -122,19 +118,19 @@ namespace Marmot::FiniteElement {
             for ( int p = 0; p < nN; p++ ) {
               dN_dXi_( 0,
                        p + q * nN +
-                         r * nN*nN ) = dB_dU< order >( xi( 0 ), this->_knotVectorsNormalized.col( 0 ).data(), p ) *
-                                     B< order >( xi( 1 ), this->_knotVectorsNormalized.col( 1 ).data(), q ) *
-                                     B< order >( xi( 2 ), this->_knotVectorsNormalized.col( 2 ).data(), r );
+                         r * nN * nN ) = dB_dU< order >( xi( 0 ), this->_knotVectorsNormalized.col( 0 ).data(), p ) *
+                                         B< order >( xi( 1 ), this->_knotVectorsNormalized.col( 1 ).data(), q ) *
+                                         B< order >( xi( 2 ), this->_knotVectorsNormalized.col( 2 ).data(), r );
               dN_dXi_( 1,
                        p + q * nN +
-                         r * nN*nN ) = B< order >( xi( 0 ), this->_knotVectorsNormalized.col( 0 ).data(), p ) *
-                                     dB_dU< order >( xi( 1 ), this->_knotVectorsNormalized.col( 1 ).data(), q ) *
-                                     B< order >( xi( 2 ), this->_knotVectorsNormalized.col( 2 ).data(), r );
+                         r * nN * nN ) = B< order >( xi( 0 ), this->_knotVectorsNormalized.col( 0 ).data(), p ) *
+                                         dB_dU< order >( xi( 1 ), this->_knotVectorsNormalized.col( 1 ).data(), q ) *
+                                         B< order >( xi( 2 ), this->_knotVectorsNormalized.col( 2 ).data(), r );
               dN_dXi_( 2,
                        p + q * nN +
-                         r * nN*nN ) = B< order >( xi( 0 ), this->_knotVectorsNormalized.col( 0 ).data(), p ) *
-                                     B< order >( xi( 1 ), this->_knotVectorsNormalized.col( 1 ).data(), q ) *
-                                     dB_dU< order >( xi( 2 ), this->_knotVectorsNormalized.col( 2 ).data(), r );
+                         r * nN * nN ) = B< order >( xi( 0 ), this->_knotVectorsNormalized.col( 0 ).data(), p ) *
+                                         B< order >( xi( 1 ), this->_knotVectorsNormalized.col( 1 ).data(), q ) *
+                                         dB_dU< order >( xi( 2 ), this->_knotVectorsNormalized.col( 2 ).data(), r );
             }
 
       return dN_dXi_;
