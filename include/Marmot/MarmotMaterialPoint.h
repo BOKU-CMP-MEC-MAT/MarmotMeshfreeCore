@@ -46,6 +46,8 @@ public:
 
   virtual void computeYourself( double timeNew, double dT ) = 0;
 
+  virtual void acceptStateAndPosition(){};
+
   virtual StateView getStateView( const std::string& stateName ) const = 0;
 
   virtual int getNumberOfRequiredStateVars() const = 0;
