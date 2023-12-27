@@ -64,5 +64,5 @@ public:
 
   virtual void getVertexCoordinates( double* coordinates ) const = 0;
 
-  virtual double getVolume() const = 0;
+  virtual double getVolumeUndeformed() const = 0;
 };
