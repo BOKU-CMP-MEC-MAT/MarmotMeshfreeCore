@@ -24,9 +24,9 @@
  * the top level directory of marmot.
  * ---------------------------------------------------------------------
  */
-#include "Marmot/MarmotMPMLibrary.h"
 #include "Marmot/MarmotCell.h"
 #include "Marmot/MarmotJournal.h"
+#include "Marmot/MarmotMPMLibrary.h"
 #include "Marmot/MarmotMaterialPoint.h"
 #include <algorithm>
 #include <cassert>
@@ -174,6 +174,49 @@ namespace MarmotLibrary {
     }
     catch ( const std::out_of_range& e ) {
       throw std::invalid_argument( MakeString() << "Invalid cell " << cellName << " requested!" );
+    }
+  }
+
+  /*
+   *    ____     _ _ _____ _                           _
+   *   / ___|___| | | ____| | ___ _ __ ___   ___ _ __ | |_ ___
+   *  | |   / _ \ | |  _| | |/ _ \ '_ ` _ \ / _ \ '_ \| __/ __|
+   *  | |__|  __/ | | |___| |  __/ | | | | |  __/ | | | |_\__ \
+   *   \____\___|_|_|_____|_|\___|_| |_| |_|\___|_| |_|\__|___/
+   */
+
+  std::unordered_map< std::string, MarmotCellElementFactory::cellElementFactoryFunction >
+    MarmotCellElementFactory::cellElementFactoryFunctionByName;
+
+  bool MarmotCellElementFactory::registerCellElement( const std::string&         cellElementName,
+                                                      cellElementFactoryFunction factoryFunction )
+  {
+
+    const auto cellElementNameUpperCase = makeStringUpperCase( cellElementName );
+
+    assert( cellElementFactoryFunctionByName.find( cellElementNameUpperCase ) ==
+            cellElementFactoryFunctionByName.end() );
+
+    cellElementFactoryFunctionByName[cellElementNameUpperCase] = factoryFunction;
+
+    return true;
+  }
+
+  MarmotCellElement* MarmotCellElementFactory::createCellElement( const std::string& cellElementName,
+                                                                  int                cellElementNumber,
+                                                                  const double*      nodeCoordinates,
+                                                                  int                sizeNodeCoordinates,
+                                                                  const std::string& quadratureRule,
+                                                                  int                quadratureOrder )
+  {
+    const auto cellNameUpperCase = makeStringUpperCase( cellElementName );
+
+    try {
+      return cellElementFactoryFunctionByName.at(
+        cellNameUpperCase )( cellElementNumber, nodeCoordinates, sizeNodeCoordinates, quadratureRule, quadratureOrder );
+    }
+    catch ( const std::out_of_range& e ) {
+      throw std::invalid_argument( MakeString() << "Invalid cellElement " << cellElementNumber << " requested!" );
     }
   }
 

@@ -27,6 +27,7 @@
  */
 #pragma once
 #include "Marmot/MarmotCell.h"
+#include "Marmot/MarmotCellElement.h"
 #include "Marmot/MarmotMaterialPoint.h"
 #include <functional>
 #include <iostream>
@@ -103,6 +104,34 @@ namespace MarmotLibrary {
   private:
     static std::unordered_map< std::string, cellFactoryFunction >        cellFactoryFunctionByName;
     static std::unordered_map< std::string, bSplineCellFactoryFunction > bSplineCellFactoryFunctionByName;
+  };
+
+  // CellElementFactory
+  //
+  // - Allows cellElements to register themselve with their name
+  // - Allows the user to create instances of cellElements
+
+  class MarmotCellElementFactory {
+  public:
+    using cellElementFactoryFunction = MarmotCellElement* (*)( int                cellElementNumber,
+                                                               const double*      vertexCoordinates,
+                                                               int                sizeVertexCoordinates,
+                                                               const std::string& quadratureRule,
+                                                               int                quadratureOrder );
+
+    MarmotCellElementFactory() = delete;
+
+    static MarmotCellElement* createCellElement( const std::string& cellElementName,
+                                                 int                cellElementNumber,
+                                                 const double*      nodeCoordinates,
+                                                 int                sizeNodeCoordinates,
+                                                 const std::string& quadratureRule,
+                                                 int                quadratureOrder );
+
+    static bool registerCellElement( const std::string& cellElementName, cellElementFactoryFunction factoryFunction );
+
+    /* private: */
+    static std::unordered_map< std::string, cellElementFactoryFunction > cellElementFactoryFunctionByName;
   };
 
 } // namespace MarmotLibrary
