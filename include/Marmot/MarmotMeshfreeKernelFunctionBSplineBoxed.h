@@ -47,7 +47,11 @@ namespace Marmot::Meshfree {
 
     double computeKernelFunction( const double* coord ) const override;
 
+    void computeKernelFunctionGradient( const double* coord, double* grad ) const override;
+
     double computeBSpline2ndOrder( double coord_minus_center ) const;
+
+    double computeBSpline2ndOrderGradient( double coord_minus_center) const;
 
     const double* getCenterCoordinates() const override;
 

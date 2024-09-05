@@ -38,7 +38,7 @@ namespace Marmot::Meshfree {
 
     virtual double computeKernelFunction( const double* coord ) const = 0;
 
-    /* virtual void computeKernelFunctionGradient( const double* coord, double* grad ) const = 0; */
+    virtual void computeKernelFunctionGradient( const double* coord, double* grad ) const = 0;
 
     virtual void getBoundingBox( double* lower, double* upper ) const = 0;
 

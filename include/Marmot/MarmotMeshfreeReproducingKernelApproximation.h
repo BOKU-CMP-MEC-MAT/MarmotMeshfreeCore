@@ -47,6 +47,12 @@ namespace Marmot::Meshfree {
                                     int                    idx,
                                     int                    dim );
 
+    int static computeHGradientRecursively( int                    completenessOrder,
+                                    const Eigen::VectorXd& x_minus_center,
+                                    Eigen::MatrixXd&       res,
+                                    int                    idx,
+                                    int                    dim );
+
   public:
     MarmotMeshfreeReproducingKernelApproximation( int dim, int completenessOrder );
 
@@ -75,7 +81,17 @@ namespace Marmot::Meshfree {
       const std::vector< const MarmotMeshfreeKernelFunction* >& coveringShapeFunctions,
       int                                                       completenessOrder );
 
+    static Eigen::MatrixXd computeHVectorGradient(
+      const Eigen::VectorXd&                                    globalCoord,
+      const std::vector< const MarmotMeshfreeKernelFunction* >& coveringShapeFunctions,
+      int                                                       completenessOrder );
+
     static Eigen::MatrixXd computeMMatrix(
+      const Eigen::VectorXd&                                    globalCoord,
+      const std::vector< const MarmotMeshfreeKernelFunction* >& coveringShapeFunctions,
+      int                                                       completenessOrder );
+
+    static std::pair<Eigen::MatrixXd, std::vector< Eigen::MatrixXd > > computeMMatrixAndGradient(
       const Eigen::VectorXd&                                    globalCoord,
       const std::vector< const MarmotMeshfreeKernelFunction* >& coveringShapeFunctions,
       int                                                       completenessOrder );

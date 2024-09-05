@@ -26,6 +26,24 @@ namespace Marmot::Meshfree {
     return res;
   }
 
+  void MarmotMeshfreeKernelFunctionBSplineBoxed::computeKernelFunctionGradient( const double* coord, double* grad ) const
+  {
+    for ( int i = 0; i < _dim; i++ ) {
+      grad[i] = 0;
+    }
+
+    for ( int i = 0; i < _dim; i++ ) {
+      double res = 1.0;
+      for ( int j = 0; j < _dim; j++ ) {
+        if ( i == j )
+          res *= computeBSpline2ndOrderGradient( coord[j] - _centerCoord[j] );
+        else
+          res *= computeBSpline2ndOrder( coord[j] - _centerCoord[j] );
+      }
+      grad[i] = res;
+    }
+  }
+
   double MarmotMeshfreeKernelFunctionBSplineBoxed::computeBSpline2ndOrder( double coord_minus_center ) const
   {
     const double z = std::abs( coord_minus_center ) / _supportRadius;
@@ -36,6 +54,19 @@ namespace Marmot::Meshfree {
       return 2 - 4 * z + 2 * z * z;
     return 0;
   }
+
+  double MarmotMeshfreeKernelFunctionBSplineBoxed::computeBSpline2ndOrderGradient( double coord_minus_center ) const
+  {
+    const double z = std::abs( coord_minus_center ) / _supportRadius;
+    const double dz_dcoord = coord_minus_center > 0 ? 1.0 / _supportRadius : -1.0 / _supportRadius;
+
+    if ( z <= 1. / 2 )
+      return -4 * z * dz_dcoord;
+    if ( z <= 1 )
+      return (-4 + 4 * z) * dz_dcoord;
+    return 0;
+  }
+
 
   const double* MarmotMeshfreeKernelFunctionBSplineBoxed::getCenterCoordinates() const
   {
