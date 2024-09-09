@@ -51,11 +51,11 @@ namespace Marmot::Meshfree {
 
     double computeBSpline2ndOrder( double coord_minus_center ) const;
 
-    double computeBSpline2ndOrderGradient( double coord_minus_center) const;
+    double computeBSpline2ndOrderGradient( double coord_minus_center ) const;
 
     const double* getCenterCoordinates() const override;
 
-    void move( const double* coord ) override;
+    void moveTo( const double* coord ) override;
 
     bool isInSupport( const double* coord ) const override;
 

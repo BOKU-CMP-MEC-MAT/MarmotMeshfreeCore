@@ -45,6 +45,13 @@ namespace Marmot::Meshfree {
    * Similar to finite elements, the MarmotParticle class is responsible for the computation of the internal forces,
    * the body loads and the distributed loads.
    * Also, it may have a distinct shape (commonly a point).
+   *
+   * For the computation of the residual vector and the stiffness matrix, unlike elements and cells, no (field-)blocked layout is possible.
+   * This is due to the fact that the number of nodes per particle is not fixed and may vary, and accordingly, the dofIndicesPermutationPattern used to designate the structure of a blocked storage may vary.
+   * Accordingly, for perfomance reasons, no dofIndicesPermutationPattern is provided, and the residual vector and the stiffness matrix are computed in a non-blocked, node-wise layout.
+   * Example: [node_1_displacement, node_1_temperature, node_2_displacement, node_2_temperature, ...], in which nodes designate the nodes of the kernel functions attached to the particle.
+   *
+   * For the stiffness matrix, a column-major layout is used.
    */
 
   class MarmotParticle {
@@ -56,8 +63,7 @@ namespace Marmot::Meshfree {
 
     /* virtual void assignApproximationType( const MarmotMeshfreeApproximation& approximation ) = 0; */
 
-    virtual void assignMeshfreeKernelFunctions(
-      const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctions ) = 0;
+    virtual void assignMeshfreeKernelFunctions( const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctions ) = 0;
 
     virtual void assignStateVars( double* stateVars, int nStateVars ) = 0;
 
@@ -88,9 +94,6 @@ namespace Marmot::Meshfree {
     /// Get the fields on which the particle lives (e.g., displacement, temperature, ...). For a particle, the
     /// contribution to each attached node is equal.
     virtual const std::vector< std::string >& getFields() const = 0;
-
-    /// Get the permutation pattern of the degrees of freedom (e.g., if a blocked storage is used)
-    virtual const std::vector< int >& getDofIndicesPermutationPattern() const = 0;
 
     virtual void computePhysicsKernels( const double* dQ,
                                         double*       fInt,

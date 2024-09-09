@@ -46,7 +46,7 @@ namespace Marmot::Meshfree {
 
     virtual const double* getCenterCoordinates() const = 0;
 
-    virtual void move( const double* coord ) = 0;
+    virtual void moveTo( const double* coord ) = 0;
   };
 
 } // namespace Marmot::Meshfree
