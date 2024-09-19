@@ -53,27 +53,6 @@ namespace Marmot::Meshfree {
                                             int                    idx,
                                             int                    dim );
 
-  public:
-    MarmotMeshfreeReproducingKernelApproximation( int dim, int completenessOrder );
-
-    virtual ~MarmotMeshfreeReproducingKernelApproximation() = default;
-
-    virtual void computeShapeFunctions(
-      const double*                                             coord,
-      const std::vector< const MarmotMeshfreeKernelFunction* >& coveringShapeFunctions,
-      double*                                                   shapeFunctionValues ) const override;
-
-    virtual void computeShapeFunctionGradients(
-      const double*                                             coord,
-      const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctions,
-      double*                                                   shapeFunctionValueGradients ) const override;
-
-    virtual void computeShapeFunctionsAndGradients(
-      const double*                                             coord,
-      const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctions,
-      double*                                                   shapeFunctionValues,
-      double*                                                   shapeFunctionValueGradients_ColMajor ) const override;
-
     static constexpr int computeSizeHVector( int completenessOrder, int dim );
 
     static Eigen::VectorXd computeHVector(
@@ -97,6 +76,47 @@ namespace Marmot::Meshfree {
       int                                                       completenessOrder );
 
     static Eigen::VectorXd H0Vector( int sizeHVector );
+
+  public:
+    MarmotMeshfreeReproducingKernelApproximation( int dim, int completenessOrder );
+
+    virtual ~MarmotMeshfreeReproducingKernelApproximation() = default;
+
+    virtual void computeShapeFunctions(
+      const double*                                             coord,
+      const std::vector< const MarmotMeshfreeKernelFunction* >& coveringShapeFunctions,
+      double*                                                   shapeFunctionValues ) const override;
+
+    virtual void computeShapeFunctionGradients(
+      const double*                                             coord,
+      const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctions,
+      double*                                                   shapeFunctionValueGradients ) const override;
+
+    virtual void computeShapeFunctionsAndGradients(
+      const double*                                             coord,
+      const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctions,
+      double*                                                   shapeFunctionValues,
+      double*                                                   shapeFunctionValueGradients_ColMajor ) const override;
+
+    int factorial( int n ) const
+    {
+      if ( n == 0 )
+        return 1;
+      else
+        return n * factorial( n - 1 );
+    }
+
+    bool checkNonSingularity( int nNodes ) const
+    {
+      if ( _completenessOrder > 0 ) {
+        /* std::cout << nNodes << " >= " << factorial(_dim +
+         * _completenessOrder)/(factorial(_dim)*factorial(_completenessOrder)) << std::endl; */
+        return nNodes >=
+               factorial( _dim + _completenessOrder ) / ( factorial( _dim ) * factorial( _completenessOrder ) );
+      }
+      else
+        return true;
+    }
   };
 
 } // namespace Marmot::Meshfree

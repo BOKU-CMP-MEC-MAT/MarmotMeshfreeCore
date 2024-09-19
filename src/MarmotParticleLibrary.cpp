@@ -24,9 +24,9 @@
  * the top level directory of marmot.
  * ---------------------------------------------------------------------
  */
-#include "Marmot/MarmotParticleLibrary.h"
 #include "Marmot/MarmotJournal.h"
 #include "Marmot/MarmotParticle.h"
+#include "Marmot/MarmotParticleLibrary.h"
 #include <algorithm>
 #include <cassert>
 #include <string>

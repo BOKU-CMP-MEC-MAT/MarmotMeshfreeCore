@@ -46,10 +46,13 @@ namespace Marmot::Meshfree {
    * the body loads and the distributed loads.
    * Also, it may have a distinct shape (commonly a point).
    *
-   * For the computation of the residual vector and the stiffness matrix, unlike elements and cells, no (field-)blocked layout is possible.
-   * This is due to the fact that the number of nodes per particle is not fixed and may vary, and accordingly, the dofIndicesPermutationPattern used to designate the structure of a blocked storage may vary.
-   * Accordingly, for perfomance reasons, no dofIndicesPermutationPattern is provided, and the residual vector and the stiffness matrix are computed in a non-blocked, node-wise layout.
-   * Example: [node_1_displacement, node_1_temperature, node_2_displacement, node_2_temperature, ...], in which nodes designate the nodes of the kernel functions attached to the particle.
+   * For the computation of the residual vector and the stiffness matrix, unlike elements and cells, no (field-)blocked
+   * layout is possible. This is due to the fact that the number of nodes per particle is not fixed and may vary, and
+   * accordingly, the dofIndicesPermutationPattern used to designate the structure of a blocked storage may vary.
+   * Accordingly, for perfomance reasons, no dofIndicesPermutationPattern is provided, and the residual vector and the
+   * stiffness matrix are computed in a non-blocked, node-wise layout. Example: [node_1_displacement,
+   * node_1_temperature, node_2_displacement, node_2_temperature, ...], in which nodes designate the nodes of the kernel
+   * functions attached to the particle.
    *
    * For the stiffness matrix, a column-major layout is used.
    */
@@ -61,13 +64,10 @@ namespace Marmot::Meshfree {
 
     virtual ~MarmotParticle() = default;
 
-    /* virtual void assignApproximationType( const MarmotMeshfreeApproximation& approximation ) = 0; */
-
-    virtual void assignMeshfreeKernelFunctions( const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctions ) = 0;
+    virtual void assignMeshfreeKernelFunctions(
+      const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctions ) = 0;
 
     virtual void assignStateVars( double* stateVars, int nStateVars ) = 0;
-
-    /* virtual void assignMaterial( const MarmotMaterialSection& material ) = 0; */
 
     virtual void initializeYourself() = 0;
 
@@ -90,6 +90,13 @@ namespace Marmot::Meshfree {
     /// Get the coordinates of the vertices of the particle (e.g., the nodes of a tetrahedron) for testing the coverage
     /// of the particle by shape functions.
     virtual void getVertexCoordinates( double* coordinates ) const = 0;
+
+    /// Get the coordinates of the center of the particle (e.g., the center of a tetrahedron)
+    virtual void getCenterCoordinates( double* coordinates ) const = 0;
+
+    /// Get the number of dofs per attached node (e.g., 3 for displacement, 1 for temperature, = 4 in total)
+    /// The actual number of dofs results from the number of attached nodes and the number of dofs per node.
+    virtual int getNBaseDof() const = 0;
 
     /// Get the fields on which the particle lives (e.g., displacement, temperature, ...). For a particle, the
     /// contribution to each attached node is equal.

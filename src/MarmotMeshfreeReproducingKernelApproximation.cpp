@@ -1,4 +1,5 @@
 
+#include "Marmot/MarmotJournal.h"
 #include "Marmot/MarmotMeshfreeReproducingKernelApproximation.h"
 #include <Eigen/Core>
 #include <Eigen/Dense>
@@ -42,7 +43,7 @@ namespace Marmot::Meshfree {
         idxEnd++;
       }
 
-      for ( int idx = idxStart; idx <idxEnd; idx++ )
+      for ( int idx = idxStart; idx < idxEnd; idx++ )
         res( idx ) *= std::pow( x_minus_xI[dim - 1], i );
     }
     return idxEnd;
@@ -56,19 +57,19 @@ namespace Marmot::Meshfree {
   {
     for ( int i = 0; i <= completenessOrder; i++ ) {
 
-        
-    const int idxStart = idxEnd;
+      const int idxStart = idxEnd;
 
       if ( dim > 1 )
         idxEnd = computeHGradientRecursively( completenessOrder - i, x_minus_xI, res, idxEnd, dim - 1 );
       else {
         idxEnd++;
       }
-      for ( int idx = idxStart; idx < idxEnd; idx++ ){
-          if ( i > 0 )
-            res( idx, dim - 1 ) = i * std::pow( x_minus_xI[dim - 1], i - 1 );
-          else
-            res( idx, dim - 1 ) = 0;}
+      for ( int idx = idxStart; idx < idxEnd; idx++ ) {
+        if ( i > 0 )
+          res( idx, dim - 1 ) = i * std::pow( x_minus_xI[dim - 1], i - 1 );
+        else
+          res( idx, dim - 1 ) = 0;
+      }
     }
     return idxEnd;
   }
@@ -173,6 +174,13 @@ namespace Marmot::Meshfree {
     const std::vector< const MarmotMeshfreeKernelFunction* >& coveringKernelFunctions,
     double*                                                   shapeFunctionValues ) const
   {
+    if ( !checkNonSingularity( coveringKernelFunctions.size() ) )
+      throw std::runtime_error( MakeString() << __PRETTY_FUNCTION__
+                                             << " : Not enough nodes to compute the shape functions due to singularity "
+                                                "equation system of the correction:"
+                                             << coveringKernelFunctions.size() << " < "
+                                             << factorial( _dim + _completenessOrder ) /
+                                                  ( factorial( _dim ) * factorial( _completenessOrder ) ) );
 
     /* // MAp: */
     const Eigen::Map< const Eigen::VectorXd > coordVec( coord, _dim );
@@ -211,12 +219,21 @@ namespace Marmot::Meshfree {
     double*                                                   shapeFunctionValues,
     double*                                                   shapeFunctionValueGradients_ ) const
   {
+
+    if ( !checkNonSingularity( coveringKernelFunctions.size() ) )
+      throw std::runtime_error( MakeString() << __PRETTY_FUNCTION__
+                                             << " : Not enough nodes to compute the shape functions due to singularity "
+                                                "equation system of the correction:"
+                                             << coveringKernelFunctions.size() << " < "
+                                             << factorial( _dim + _completenessOrder ) /
+                                                  ( factorial( _dim ) * factorial( _completenessOrder ) ) );
+
     const Eigen::Map< const Eigen::VectorXd > coordVec( coord, _dim );
     const auto                                sizeH = computeSizeHVector( _completenessOrder, _dim );
 
     Eigen::Map< Eigen::MatrixXd > shapeFunctionValueGradients( shapeFunctionValueGradients_,
-                                                               _dim, coveringKernelFunctions.size()
-                                                               );
+                                                               _dim,
+                                                               coveringKernelFunctions.size() );
 
     const auto [M, MGradients] = computeMMatrixAndGradient( coordVec, coveringKernelFunctions, _completenessOrder );
 
