@@ -37,7 +37,7 @@ namespace Marmot::Meshfree {
 
   class MarmotMeshfreeReproducingKernelApproximation : public MarmotMeshfreeApproximation {
 
-  private:
+  protected:
     int _dim;
     int _completenessOrder;
 
@@ -77,6 +77,26 @@ namespace Marmot::Meshfree {
 
     static Eigen::VectorXd H0Vector( int sizeHVector );
 
+    int factorial( int n ) const
+    {
+      if ( n == 0 )
+        return 1;
+      else
+        return n * factorial( n - 1 );
+    }
+
+    bool checkNonSingularity( int nNodes ) const
+    {
+      if ( _completenessOrder > 0 ) {
+        /* std::cout << nNodes << " >= " << factorial(_dim +
+         * _completenessOrder)/(factorial(_dim)*factorial(_completenessOrder)) << std::endl; */
+        return nNodes >=
+               factorial( _dim + _completenessOrder ) / ( factorial( _dim ) * factorial( _completenessOrder ) );
+      }
+      else
+        return true;
+    }
+
   public:
     MarmotMeshfreeReproducingKernelApproximation( int dim, int completenessOrder );
 
@@ -97,26 +117,6 @@ namespace Marmot::Meshfree {
       const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctions,
       double*                                                   shapeFunctionValues,
       double*                                                   shapeFunctionValueGradients_ColMajor ) const override;
-
-    int factorial( int n ) const
-    {
-      if ( n == 0 )
-        return 1;
-      else
-        return n * factorial( n - 1 );
-    }
-
-    bool checkNonSingularity( int nNodes ) const
-    {
-      if ( _completenessOrder > 0 ) {
-        /* std::cout << nNodes << " >= " << factorial(_dim +
-         * _completenessOrder)/(factorial(_dim)*factorial(_completenessOrder)) << std::endl; */
-        return nNodes >=
-               factorial( _dim + _completenessOrder ) / ( factorial( _dim ) * factorial( _completenessOrder ) );
-      }
-      else
-        return true;
-    }
   };
 
 } // namespace Marmot::Meshfree

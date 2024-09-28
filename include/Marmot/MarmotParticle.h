@@ -116,7 +116,7 @@ namespace Marmot::Meshfree {
                                   double        dT ) const = 0;
 
     virtual void computeDistributedLoad( int           type,
-                                         int           surfaceID,
+                                         int           boundaryFaceID,
                                          const double* load,
                                          const double* dQ,
                                          double*       fExt,
@@ -129,6 +129,42 @@ namespace Marmot::Meshfree {
     virtual const std::unordered_map< std::string, int >& getSupportedBodyLoadTypes() const = 0;
 
     virtual const std::unordered_map< std::string, int >& getSupportedDistributedLoadTypes() const = 0;
+
+    /**
+     * We also implement the Variationally Consistent Integration (VCI)
+     * according to the work of Chen, Hillman and Rueter (2013). The VCI method is used to modify the test functions by
+     * adding correction terms. These correction terms are computed globally from xi_Ii = - ( <Psi_I,i>_V - <Psi_I
+     * n_i>_S ) / <R_I>_V
+     *
+     * a larger number of correction terms can be computed, which allows to satisfy higher order galerkin exactness
+     * conditions.
+     *
+     *
+     * Therein,
+     * <Psi_I,i>_V is the volume integral of the gradient of the test function Psi_I
+     * <Psi_I n_i>_S is the surface integral of the test function Psi_I with normal n_i
+     * <R_I>_V is the volume integral of the kernel localization function R_I
+     *
+     * According, for computing the correction terms xi_Ii, these three integrals have to be computed.
+     */
+
+    /// Get the number of VCI constraints
+    virtual int getNumberOfVCIConstraints() = 0;
+
+    /// Compute the boundary integral of the test function for the constraint with index vciConstraint
+    virtual void computeTestFunctionBoundaryIntegral( double*       fInt,
+                                                      const double* boundarySurfaceVector,
+                                                      int           boundaryFaceID,
+                                                      int           vciConstraint ) = 0;
+
+    /// Compute the volume integral of the gradient of the test function for the constraint with index vciConstraint
+    virtual void computeTestFuntionGradientVolumeIntegral( double* fInt, int vciConstraint ) = 0;
+
+    /// Compute the kernel localization integral for the constraint with index vciConstraint
+    virtual void computeKernelLocalizationIntegral( double* fInt, int vciConstraint ) = 0;
+
+    /// Assign the correction terms to the shape functions for the constraint with index vciConstraint
+    virtual void assignShapeFunctionCorrectionTerms( const double* correctionTerms, int vciConstraint ) = 0;
   };
 
 } // namespace Marmot::Meshfree
