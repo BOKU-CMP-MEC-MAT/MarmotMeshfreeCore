@@ -64,5 +64,7 @@ public:
 
   virtual void getVertexCoordinates( double* coordinates ) const = 0;
 
+  virtual void getCenterDisplacement( double* displacement ) const = 0;
+
   virtual double getVolumeUndeformed() const = 0;
 };
