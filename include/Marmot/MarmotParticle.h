@@ -118,7 +118,6 @@ namespace Marmot::Meshfree {
     virtual void computeDistributedLoad( int           type,
                                          int           boundaryFaceID,
                                          const double* load,
-                                         const double* dQ,
                                          double*       fExt,
                                          double*       dExt_dQ,
                                          double        timeNew,
