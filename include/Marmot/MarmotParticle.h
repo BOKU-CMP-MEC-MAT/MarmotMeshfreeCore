@@ -71,7 +71,7 @@ namespace Marmot::Meshfree {
 
     virtual void initializeYourself() = 0;
 
-    virtual void acceptStateAndPosition() {};
+    virtual void acceptStateAndPosition() = 0;
 
     virtual StateView getStateView( const std::string& stateName ) const = 0;
 

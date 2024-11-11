@@ -1,4 +1,4 @@
-#include "Marmot/MarmotMeshfreeKernelFunctionBSplineBoxed.h"
+#include "Marmot/MarmotMeshfreeKernelFunctionBSpline2ndOrderBoxed.h"
 
 #include <Eigen/Core>
 #include <Eigen/Dense>
@@ -6,15 +6,15 @@
 
 namespace Marmot::Meshfree {
 
-  MarmotMeshfreeKernelFunctionBSplineBoxed::MarmotMeshfreeKernelFunctionBSplineBoxed( double* centerCoord,
-                                                                                      int     dim,
-                                                                                      double  supportRadius,
-                                                                                      int     continuityOrder )
-    : _centerCoord( centerCoord ), _supportRadius( supportRadius ), _dim( dim ), _continuityOrder( continuityOrder )
+  MarmotMeshfreeKernelFunctionBSpline2ndOrderBoxed::MarmotMeshfreeKernelFunctionBSpline2ndOrderBoxed(
+    double* centerCoord,
+    int     dim,
+    double  supportRadius )
+    : _centerCoord( centerCoord ), _supportRadius( supportRadius ), _dim( dim )
   {
   }
 
-  double MarmotMeshfreeKernelFunctionBSplineBoxed::computeKernelFunction( const double* coord ) const
+  double MarmotMeshfreeKernelFunctionBSpline2ndOrderBoxed::computeKernelFunction( const double* coord ) const
   {
 
     double res = 1.0;
@@ -26,8 +26,8 @@ namespace Marmot::Meshfree {
     return res;
   }
 
-  void MarmotMeshfreeKernelFunctionBSplineBoxed::computeKernelFunctionGradient( const double* coord,
-                                                                                double*       grad ) const
+  void MarmotMeshfreeKernelFunctionBSpline2ndOrderBoxed::computeKernelFunctionGradient( const double* coord,
+                                                                                        double*       grad ) const
   {
     for ( int i = 0; i < _dim; i++ ) {
       grad[i] = 0;
@@ -45,10 +45,9 @@ namespace Marmot::Meshfree {
     }
   }
 
-  double MarmotMeshfreeKernelFunctionBSplineBoxed::computeBSpline2ndOrder( double coord_minus_center ) const
+  double MarmotMeshfreeKernelFunctionBSpline2ndOrderBoxed::computeBSpline2ndOrder( double coord_minus_center ) const
   {
     const double z = std::abs( coord_minus_center ) / _supportRadius;
-
     if ( z <= 1. / 2 )
       return 1 - 2 * z * z;
     if ( z <= 1 )
@@ -56,11 +55,11 @@ namespace Marmot::Meshfree {
     return 0;
   }
 
-  double MarmotMeshfreeKernelFunctionBSplineBoxed::computeBSpline2ndOrderGradient( double coord_minus_center ) const
+  double MarmotMeshfreeKernelFunctionBSpline2ndOrderBoxed::computeBSpline2ndOrderGradient(
+    double coord_minus_center ) const
   {
     const double z         = std::abs( coord_minus_center ) / _supportRadius;
     const double dz_dcoord = coord_minus_center > 0 ? 1.0 / _supportRadius : -1.0 / _supportRadius;
-
     if ( z <= 1. / 2 )
       return -4 * z * dz_dcoord;
     if ( z <= 1 )
@@ -68,24 +67,24 @@ namespace Marmot::Meshfree {
     return 0;
   }
 
-  const double* MarmotMeshfreeKernelFunctionBSplineBoxed::getCenterCoordinates() const
+  const double* MarmotMeshfreeKernelFunctionBSpline2ndOrderBoxed::getCenterCoordinates() const
   {
     return _centerCoord;
   }
 
-  void MarmotMeshfreeKernelFunctionBSplineBoxed::moveTo( const double* coordinate )
+  void MarmotMeshfreeKernelFunctionBSpline2ndOrderBoxed::moveTo( const double* coordinate )
   {
     for ( int i = 0; i < _dim; i++ ) {
       _centerCoord[i] = coordinate[i];
     }
   }
 
-  bool MarmotMeshfreeKernelFunctionBSplineBoxed::isInSupport( const double* coord ) const
+  bool MarmotMeshfreeKernelFunctionBSpline2ndOrderBoxed::isInSupport( const double* coord ) const
   {
     return computeKernelFunction( coord ) > 0;
   }
 
-  void MarmotMeshfreeKernelFunctionBSplineBoxed::getBoundingBox( double* min, double* max ) const
+  void MarmotMeshfreeKernelFunctionBSpline2ndOrderBoxed::getBoundingBox( double* min, double* max ) const
   {
     for ( int i = 0; i < _dim; i++ ) {
       min[i] = _centerCoord[i] - _supportRadius;

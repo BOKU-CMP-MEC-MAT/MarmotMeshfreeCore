@@ -32,26 +32,25 @@
 
 namespace Marmot::Meshfree {
 
-  class MarmotMeshfreeKernelFunctionBSplineBoxed : public MarmotMeshfreeKernelFunction {
+  class MarmotMeshfreeKernelFunctionBSpline3rdOrderBoxed : public MarmotMeshfreeKernelFunction {
 
   private:
     double*      _centerCoord;
     const double _supportRadius;
     const int    _dim;
-    const int    _continuityOrder;
 
   public:
-    MarmotMeshfreeKernelFunctionBSplineBoxed( double* centerCoord, int dim, double supportRadius, int continuityOrder );
+    MarmotMeshfreeKernelFunctionBSpline3rdOrderBoxed( double* centerCoord, int dim, double supportRadius );
 
-    virtual ~MarmotMeshfreeKernelFunctionBSplineBoxed() = default;
+    virtual ~MarmotMeshfreeKernelFunctionBSpline3rdOrderBoxed() = default;
 
     double computeKernelFunction( const double* coord ) const override;
 
     void computeKernelFunctionGradient( const double* coord, double* grad ) const override;
 
-    double computeBSpline2ndOrder( double coord_minus_center ) const;
+    double computeBSpline3rdOrder( double coord_minus_center ) const;
 
-    double computeBSpline2ndOrderGradient( double coord_minus_center ) const;
+    double computeBSpline3rdOrderGradient( double coord_minus_center ) const;
 
     const double* getCenterCoordinates() const override;
 
