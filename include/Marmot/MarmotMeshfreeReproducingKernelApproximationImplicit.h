@@ -28,32 +28,30 @@
 #pragma once
 
 #include "Marmot/MarmotMeshfreeKernelFunction.h"
+#include "Marmot/MarmotMeshfreeReproducingKernelApproximation.h"
+#include <Eigen/Core>
+#include <cmath>
 #include <vector>
 
 namespace Marmot::Meshfree {
 
-  class MarmotMeshfreeApproximation {
+  class MarmotMeshfreeReproducingKernelApproximationImplicit : public MarmotMeshfreeReproducingKernelApproximation {
 
   public:
-    MarmotMeshfreeApproximation() = default;
+    MarmotMeshfreeReproducingKernelApproximationImplicit( int dim, int completenessOrder );
 
-    virtual ~MarmotMeshfreeApproximation() = default;
-
-    virtual void computeShapeFunctions( const double*                                             coord,
-                                        const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctions,
-                                        double* shapeFunctionValues ) const = 0;
+    virtual ~MarmotMeshfreeReproducingKernelApproximationImplicit() = default;
 
     virtual void computeShapeFunctionGradients(
       const double*                                             coord,
       const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctions,
-      double*                                                   shapeFunctionValueGradients ) const = 0;
+      double*                                                   shapeFunctionValueGradients ) const override;
 
     virtual void computeShapeFunctionsAndGradients(
       const double*                                             coord,
       const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctions,
       double*                                                   shapeFunctionValues,
-      double*                                                   shapeFunctionValueGradients ) const = 0;
-
+      double*                                                   shapeFunctionValueGradients_ColMajor ) const override;
   };
 
 } // namespace Marmot::Meshfree

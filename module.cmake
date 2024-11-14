@@ -6,6 +6,7 @@ list(APPEND sources ${sources_material})
 list(APPEND publicheaders 
     "${CMAKE_CURRENT_LIST_DIR}/include/Marmot/MarmotMeshfreeApproximation.h" 
     "${CMAKE_CURRENT_LIST_DIR}/include/Marmot/MarmotMeshfreeReproducingKernelApproximation.h"
+    "${CMAKE_CURRENT_LIST_DIR}/include/Marmot/MarmotMeshfreeReproducingKernelApproximationImplicit.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/Marmot/MarmotMeshfreeKernelFunction.h" 
     "${CMAKE_CURRENT_LIST_DIR}/include/Marmot/MarmotMeshfreeKernelFunctionBSpline2ndOrderBoxed.h" 
     "${CMAKE_CURRENT_LIST_DIR}/include/Marmot/MarmotMeshfreeKernelFunctionBSpline3rdOrderBoxed.h" 
