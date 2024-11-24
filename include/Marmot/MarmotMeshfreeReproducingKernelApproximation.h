@@ -97,6 +97,8 @@ namespace Marmot::Meshfree {
         return true;
     }
 
+    std::tuple<double, const std::vector< const MarmotMeshfreeKernelFunction* >, std::vector< int >  > findCoveringKernelFunctionsAndCompletenessOrder( const double* coord, const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctions ) const;
+
   public:
     MarmotMeshfreeReproducingKernelApproximation( int dim, int completenessOrder );
 

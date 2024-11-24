@@ -171,21 +171,23 @@ namespace Marmot::Meshfree {
 
   void MarmotMeshfreeReproducingKernelApproximation::computeShapeFunctions(
     const double*                                             coord,
-    const std::vector< const MarmotMeshfreeKernelFunction* >& coveringKernelFunctions,
+    const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctionCandidates,
     double*                                                   shapeFunctionValues ) const
   {
-    if ( !checkNonSingularity( coveringKernelFunctions.size() ) )
-      throw std::runtime_error( MakeString() << __PRETTY_FUNCTION__
-                                             << " : Not enough nodes to compute the shape functions due to singularity "
-                                                "equation system of the correction:"
-                                             << coveringKernelFunctions.size() << " < "
-                                             << factorial( _dim + _completenessOrder ) /
-                                                  ( factorial( _dim ) * factorial( _completenessOrder ) ) );
+    /* if ( !checkNonSingularity( coveringKernelFunctions.size() ) ) */
+    /*   throw std::runtime_error( MakeString() << __PRETTY_FUNCTION__ */
+    /*                                          << " : Not enough nodes to compute the shape functions due to singularity " */
+    /*                                             "equation system of the correction:" */
+    /*                                          << coveringKernelFunctions.size() << " < " */
+    /*                                          << factorial( _dim + _completenessOrder ) / */
+    /*                                               ( factorial( _dim ) * factorial( _completenessOrder ) ) ); */
+    const auto [correctedCompletenessOrder, coveringKernelFunctions, nonZeroKernelFunctionsIndices
+    ] = findCoveringKernelFunctionsAndCompletenessOrder( coord, kernelFunctionCandidates);
 
     /* // MAp: */
     const Eigen::Map< const Eigen::VectorXd > coordVec( coord, _dim );
 
-    const auto M = computeMMatrix( coordVec, coveringKernelFunctions, _completenessOrder );
+    const auto M = computeMMatrix( coordVec, coveringKernelFunctions, correctedCompletenessOrder);
 
     // solve for b(x)
     // b = M^-1 * H0
@@ -195,13 +197,19 @@ namespace Marmot::Meshfree {
 
     // compute the shape function values
 
+    for ( int A = 0; A < (int)kernelFunctionCandidates.size(); A++ ) 
+        shapeFunctionValues[A] = 0;
     for ( int A = 0; A < (int)coveringKernelFunctions.size(); A++ ) {
+
+
       const auto H = computeHVector( coordVec - Eigen::Map< const Eigen::VectorXd >( coveringKernelFunctions[A]
                                                                                        ->getCenterCoordinates(),
                                                                                      _dim ),
                                      coveringKernelFunctions,
-                                     _completenessOrder );
-      shapeFunctionValues[A] = b.dot( H ) * coveringKernelFunctions[A]->computeKernelFunction( coord );
+                                     correctedCompletenessOrder);
+      shapeFunctionValues[ nonZeroKernelFunctionsIndices[A] ] = b.dot( H ) * coveringKernelFunctions[A]->computeKernelFunction( coord );
+
+
     }
   }
 
@@ -213,78 +221,133 @@ namespace Marmot::Meshfree {
     throw std::runtime_error( "Not implemented" );
   }
 
+
+
+
+    std::tuple<double, const std::vector< const MarmotMeshfreeKernelFunction* >, std::vector< int >  >
+    MarmotMeshfreeReproducingKernelApproximation::findCoveringKernelFunctionsAndCompletenessOrder( const double* coord, const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctions )  const
+
+    {
+       int correctedCompletenessOrder = _completenessOrder; 
+       std::vector< const MarmotMeshfreeKernelFunction* > coveringKernelFunctions;
+       std::vector< int > nonZeroKernelFunctionsIndices;
+
+       int nonZeroKernelFunctions = 0;
+       /* for ( const auto& kernelFunction : kernelFunctions ) { */
+       for ( int i = 0; i < static_cast<int>( kernelFunctions.size() ); i++ ) {
+         if ( std::abs ( kernelFunctions[i]->computeKernelFunction( coord ) ) > 0 ){
+            nonZeroKernelFunctions++;
+            coveringKernelFunctions.push_back( kernelFunctions[i] );
+            nonZeroKernelFunctionsIndices.push_back( i );
+         }
+
+       }
+
+       while ( nonZeroKernelFunctions < factorial( _dim + correctedCompletenessOrder ) / ( factorial( _dim ) * factorial( correctedCompletenessOrder ) ))
+       {
+           correctedCompletenessOrder--; 
+           if ( correctedCompletenessOrder < 0 )
+             throw std::runtime_error( MakeString() << __PRETTY_FUNCTION__
+                                                    << " : Not enough nodes to compute the shape functions due to singularity "
+                                                       "equation system of the correction:" << nonZeroKernelFunctions << " < "
+                                                    << factorial( _dim + _completenessOrder ) / ( factorial( _dim ) * factorial( _completenessOrder ) ) );
+       }
+
+       /* if ( correctedCompletenessOrder != _completenessOrder ) */
+       /* { */
+       /*   std::cout << "Corrected completeness order: " << correctedCompletenessOrder << std::endl; */
+       /*   std::cout << "nonZeroKernelFunctions: " << nonZeroKernelFunctions << std::endl; */
+       /*   std::cout << "number of coveringKernelFunctions: " << coveringKernelFunctions.size() << std::endl; */
+       /*   std::cout << "number of kernelFunctions: " << kernelFunctions.size() << std::endl; */
+       /* } */
+
+       return { correctedCompletenessOrder, coveringKernelFunctions, nonZeroKernelFunctionsIndices };
+    }
+
+
+
+
+
+
   void MarmotMeshfreeReproducingKernelApproximation::computeShapeFunctionsAndGradients(
     const double*                                             coord,
-    const std::vector< const MarmotMeshfreeKernelFunction* >& coveringKernelFunctions,
+    const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctionCandidates,
     double*                                                   shapeFunctionValues,
     double*                                                   shapeFunctionValueGradients_ ) const
   {
+    throw std::runtime_error( "Not implemented" );
 
-    if ( !checkNonSingularity( coveringKernelFunctions.size() ) )
-      throw std::runtime_error( MakeString() << __PRETTY_FUNCTION__
-                                             << " : Not enough nodes to compute the shape functions due to singularity "
-                                                "equation system of the correction:"
-                                             << coveringKernelFunctions.size() << " < "
-                                             << factorial( _dim + _completenessOrder ) /
-                                                  ( factorial( _dim ) * factorial( _completenessOrder ) ) );
+    const auto [correctedCompletenessOrder, coveringKernelFunctions, nonZeroKernelFunctionsIndices ] = findCoveringKernelFunctionsAndCompletenessOrder( coord, kernelFunctionCandidates);
+    /* std::cout << "correctedCompletenessOrder: " << correctedCompletenessOrder << std::endl; */
 
-    const Eigen::Map< const Eigen::VectorXd > coordVec( coord, _dim );
-    const auto                                sizeH = computeSizeHVector( _completenessOrder, _dim );
 
-    Eigen::Map< Eigen::MatrixXd > shapeFunctionValueGradients( shapeFunctionValueGradients_,
-                                                               _dim,
-                                                               coveringKernelFunctions.size() );
+        /* = */ 
 
-    const auto [M, MGradients] = computeMMatrixAndGradient( coordVec, coveringKernelFunctions, _completenessOrder );
+    /* if ( !checkNonSingularity( coveringKernelFunctions.size() ) ) */
+    /*   throw std::runtime_error( MakeString() << __PRETTY_FUNCTION__ */
+    /*                                          << " : Not enough nodes to compute the shape functions due to singularity " */
+    /*                                             "equation system of the correction:" */
+    /*                                          << coveringKernelFunctions.size() << " < " */
+    /*                                          << factorial( _dim + _completenessOrder ) / */
+    /*                                               ( factorial( _dim ) * factorial( _completenessOrder ) ) ); */
 
-    // solve for b(x)
-    // b = M^-1 * H0
-    const auto H0 = H0Vector( sizeH );
+    /* const Eigen::Map< const Eigen::VectorXd > coordVec( coord, _dim ); */
+    /* const auto                                sizeH = computeSizeHVector( correctedCompletenessOrder , _dim ); */
 
-    const auto MHr = M.colPivHouseholderQr();
+    /* Eigen::Map< Eigen::MatrixXd > shapeFunctionValueGradients( shapeFunctionValueGradients_, */
+    /*                                                            _dim, */
+    /*                                                            coveringKernelFunctions.size() ); */
 
-    const Eigen::VectorXd b = MHr.solve( H0 );
+    /* const auto [M, MGradients] = computeMMatrixAndGradient( coordVec, coveringKernelFunctions, correctedCompletenessOrder ); */
 
-    shapeFunctionValueGradients.setZero();
+    /* // solve for b(x) */
+    /* // b = M^-1 * H0 */
+    /* const auto H0 = H0Vector( sizeH ); */
 
-    for ( int A = 0; A < (int)coveringKernelFunctions.size(); A++ ) {
+    /* const auto MHr = M.colPivHouseholderQr(); */
 
-      const Eigen::VectorXd x_minus_center = coordVec - Eigen::Map< const Eigen::VectorXd >( coveringKernelFunctions[A]
-                                                                                               ->getCenterCoordinates(),
-                                                                                             _dim );
+    /* const Eigen::VectorXd b = MHr.solve( H0 ); */
 
-      const auto      phi_A         = coveringKernelFunctions[A]->computeKernelFunction( coord );
-      Eigen::VectorXd phiGradient_A = Eigen::VectorXd::Zero( _dim );
-      coveringKernelFunctions[A]->computeKernelFunctionGradient( coord, phiGradient_A.data() );
+    /* shapeFunctionValueGradients.setZero(); */
 
-      const auto H         = computeHVector( x_minus_center, coveringKernelFunctions, _completenessOrder );
-      const auto HGradient = computeHVectorGradient( x_minus_center, coveringKernelFunctions, _completenessOrder );
+    /* for ( int A = 0; A < (int)coveringKernelFunctions.size(); A++ ) { */
 
-      shapeFunctionValues[A] = b.dot( H ) * phi_A;
+    /*   const Eigen::VectorXd x_minus_center = coordVec - Eigen::Map< const Eigen::VectorXd >( coveringKernelFunctions[A] */
+    /*                                                                                            ->getCenterCoordinates(), */
+    /*                                                                                          _dim ); */
 
-      const Eigen::MatrixXd MInv_HGrad = MHr.solve( HGradient );
-      const Eigen::VectorXd MInv_H     = MHr.solve( H );
+    /*   const auto      phi_A         = coveringKernelFunctions[A]->computeKernelFunction( coord ); */
+    /*   Eigen::VectorXd phiGradient_A = Eigen::VectorXd::Zero( _dim ); */
+    /*   coveringKernelFunctions[A]->computeKernelFunctionGradient( coord, phiGradient_A.data() ); */
 
-      // let's compute the gradient of the shape function
-      // dPsiA_dxi = H0_J * ( InvM_JK * H_K * phi_A ),xi
-      //
-      // dPsiA_dxi = H0_J * ( InvM_JK,xi * H_K    * phi_A +
-      //                      InvM_JK    * H_K,xi * phi_A +
-      //                      InvM_JK    * H_K    * phi_A,xi )
-      //
-      // dPsiA_dxi = H0_J * ( - [InvM_JA * M_AB,xi * InvM_BK]    * H_K    * phi_A +
-      //                      InvM_JK                            * H_K,xi * phi_A +
-      //                      InvM_JK                            * H_K    * phi_A,xi )
+    /*   const auto H         = computeHVector( x_minus_center, coveringKernelFunctions, correctedCompletenessOrder); */
+    /*   const auto HGradient = computeHVectorGradient( x_minus_center, coveringKernelFunctions, correctedCompletenessOrder); */
 
-      // we exploit the fact that H0 = 1 for idx = 0, and 0 otherwise
-      // so really we never need to compute the dot product with H0, which involves a lot of zeros
+    /*   shapeFunctionValues[A] = b.dot( H ) * phi_A; */
 
-      shapeFunctionValueGradients.col( A ) += MInv_HGrad.row( 0 ) * phi_A;
-      shapeFunctionValueGradients.col( A ) += MInv_H( 0 ) * phiGradient_A;
-      for ( int i = 0; i < _dim; i++ ) {
-        shapeFunctionValueGradients( i, A ) += ( -MHr.solve( MGradients[i] ) * MInv_H )( 0 ) * phi_A;
-      }
-    }
+    /*   const Eigen::MatrixXd MInv_HGrad = MHr.solve( HGradient ); */
+    /*   const Eigen::VectorXd MInv_H     = MHr.solve( H ); */
+
+    /*   // let's compute the gradient of the shape function */
+    /*   // dPsiA_dxi = H0_J * ( InvM_JK * H_K * phi_A ),xi */
+    /*   // */
+    /*   // dPsiA_dxi = H0_J * ( InvM_JK,xi * H_K    * phi_A + */
+    /*   //                      InvM_JK    * H_K,xi * phi_A + */
+    /*   //                      InvM_JK    * H_K    * phi_A,xi ) */
+    /*   // */
+    /*   // dPsiA_dxi = H0_J * ( - [InvM_JA * M_AB,xi * InvM_BK]    * H_K    * phi_A + */
+    /*   //                      InvM_JK                            * H_K,xi * phi_A + */
+    /*   //                      InvM_JK                            * H_K    * phi_A,xi ) */
+
+    /*   // we exploit the fact that H0 = 1 for idx = 0, and 0 otherwise */
+    /*   // so really we never need to compute the dot product with H0, which involves a lot of zeros */
+
+    /*   shapeFunctionValueGradients.col( A ) += MInv_HGrad.row( 0 ) * phi_A; */
+    /*   shapeFunctionValueGradients.col( A ) += MInv_H( 0 ) * phiGradient_A; */
+    /*   for ( int i = 0; i < _dim; i++ ) { */
+    /*     shapeFunctionValueGradients( i, A ) += ( -MHr.solve( MGradients[i] ) * MInv_H )( 0 ) * phi_A; */
+    /*   } */
+    /* } */
   }
 
 }; // namespace Marmot::Meshfree
