@@ -87,11 +87,10 @@ namespace Marmot::Meshfree {
 
     /// check if the completeness order leads to a non-singular
     /// equation system.
-    bool checkNonSingularity( int nNodes, int completenessOrder) const
+    bool checkNonSingularity( int nNodes, int completenessOrder ) const
     {
       if ( completenessOrder > 0 ) {
-        return nNodes >=
-               factorial( _dim + completenessOrder ) / ( factorial( _dim ) * factorial( completenessOrder ) );
+        return nNodes >= factorial( _dim + completenessOrder ) / ( factorial( _dim ) * factorial( completenessOrder ) );
       }
       else
         return true;
@@ -100,26 +99,26 @@ namespace Marmot::Meshfree {
     // depending in the actual number of covering kernel functions
     // the desired completeness order might not be possible.
     // This functions computions the corrected possible order.
-    int getCorrectedCompletenessOrder(int nNodes) const
+    int getCorrectedCompletenessOrder( int nNodes ) const
     {
       int correctedCompletenessOrder = _desiredCompletenessOrder;
-      while ( !checkNonSingularity( nNodes, correctedCompletenessOrder ) ) 
+      while ( !checkNonSingularity( nNodes, correctedCompletenessOrder ) )
         correctedCompletenessOrder--;
       return correctedCompletenessOrder;
     }
-    
-        const std::vector< int >
-         findCoveringKernelFunctionIndices( const double* coord, const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctions ) const;
+
+    const std::vector< int > findCoveringKernelFunctionIndices(
+      const double*                                             coord,
+      const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctions ) const;
 
   public:
     MarmotMeshfreeReproducingKernelApproximation( int dim, int completenessOrder );
 
     virtual ~MarmotMeshfreeReproducingKernelApproximation() = default;
 
-    virtual void computeShapeFunctions(
-      const double*                                             coord,
-      const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctions,
-      double*                                                   shapeFunctionValues ) const override;
+    virtual void computeShapeFunctions( const double*                                             coord,
+                                        const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctions,
+                                        double* shapeFunctionValues ) const override;
 
     virtual void computeShapeFunctionGradients(
       const double*                                             coord,

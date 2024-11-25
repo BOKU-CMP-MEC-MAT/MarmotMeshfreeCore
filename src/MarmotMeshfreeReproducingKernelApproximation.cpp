@@ -176,7 +176,7 @@ namespace Marmot::Meshfree {
   {
     const auto coveringKernelFunctionsIndices = findCoveringKernelFunctionIndices( coord, kernelFunctionCandidates );
 
-    const auto correctedCompletenessOrder     = getCorrectedCompletenessOrder( coveringKernelFunctionsIndices.size() );
+    const auto correctedCompletenessOrder = getCorrectedCompletenessOrder( coveringKernelFunctionsIndices.size() );
 
     std::vector< const MarmotMeshfreeKernelFunction* > coveringKernelFunctions;
     for ( const auto& idx : coveringKernelFunctionsIndices )
@@ -195,17 +195,20 @@ namespace Marmot::Meshfree {
 
     // compute the shape function values
 
-    for ( int A = 0; A < (int)kernelFunctionCandidates.size(); A++ )
+    for ( int A = 0; A < static_cast< int >( kernelFunctionCandidates.size() ); A++ )
       shapeFunctionValues[A] = 0;
 
     for ( const auto& A : coveringKernelFunctionsIndices ) {
+
+      const auto phi_A = kernelFunctionCandidates[A]->computeKernelFunction( coord );
 
       const auto H = computeHVector( coordVec - Eigen::Map< const Eigen::VectorXd >( kernelFunctionCandidates[A]
                                                                                        ->getCenterCoordinates(),
                                                                                      _dim ),
                                      coveringKernelFunctions,
                                      correctedCompletenessOrder );
-      shapeFunctionValues[A] = b.dot( H ) * kernelFunctionCandidates[A] ->computeKernelFunction( coord );
+
+      shapeFunctionValues[A] = b.dot( H ) * phi_A;
     }
   }
 
@@ -224,8 +227,8 @@ namespace Marmot::Meshfree {
   {
     std::vector< int > coveringFunctionsIndices;
 
-    for ( int i = 0; i < static_cast< int >( kernelFunctions.size() ); i++ ) 
-      if ( std::abs( kernelFunctions[i]->computeKernelFunction( coord ) ) > 1e-14 ) 
+    for ( int i = 0; i < static_cast< int >( kernelFunctions.size() ); i++ )
+      if ( std::abs( kernelFunctions[i]->computeKernelFunction( coord ) ) > 1e-14 )
         coveringFunctionsIndices.push_back( i );
 
     return coveringFunctionsIndices;
@@ -268,10 +271,9 @@ namespace Marmot::Meshfree {
 
     for ( const auto& A : coveringKernelFunctionIndices ) {
 
-      const Eigen::VectorXd x_minus_center = coordVec -
-                                             Eigen::Map< const Eigen::VectorXd >( kernelFunctionCandidates[A]
-                                                                                    ->getCenterCoordinates(),
-                                                                                  _dim );
+      const Eigen::VectorXd x_minus_center = coordVec - Eigen::Map< const Eigen::VectorXd >( kernelFunctionCandidates[A]
+                                                                                               ->getCenterCoordinates(),
+                                                                                             _dim );
 
       const auto      phi_A         = kernelFunctionCandidates[A]->computeKernelFunction( coord );
       Eigen::VectorXd phiGradient_A = Eigen::VectorXd::Zero( _dim );

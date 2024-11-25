@@ -1,4 +1,5 @@
 #include "Marmot/MarmotMeshfreeReproducingKernelApproximationImplicit.h"
+#include "Marmot/MarmotJournal.h"
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include <Eigen/src/Core/Matrix.h>
@@ -35,7 +36,7 @@ namespace Marmot::Meshfree {
 
     const auto correctedCompletenessOrder = getCorrectedCompletenessOrder( coveringKernelFunctionIndices.size() );
     if ( correctedCompletenessOrder < 1 ) {
-        throw std::runtime_error( "Corrected completeness order is less than 1" );
+        throw std::runtime_error( MakeString() << __PRETTY_FUNCTION__ << ": Corrected completeness order is less than 1" );
     }
 
     const Eigen::Map< const Eigen::VectorXd > coordVec( coord, _dim );
