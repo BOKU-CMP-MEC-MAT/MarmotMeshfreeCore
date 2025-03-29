@@ -1,5 +1,5 @@
-#include "Marmot/MarmotMeshfreeKernelFunction.h"
 #include "Marmot/MarmotMeshfreeReproducingKernelApproximation.h"
+#include "Marmot/MarmotMeshfreeKernelFunction.h"
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include <Eigen/src/Core/Matrix.h>

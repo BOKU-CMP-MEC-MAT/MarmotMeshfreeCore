@@ -53,7 +53,6 @@ namespace Marmot::Meshfree {
       const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctions,
       double*                                                   shapeFunctionValues,
       double*                                                   shapeFunctionValueGradients ) const = 0;
-
   };
 
 } // namespace Marmot::Meshfree

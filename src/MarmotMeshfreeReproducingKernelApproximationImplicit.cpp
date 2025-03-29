@@ -36,7 +36,8 @@ namespace Marmot::Meshfree {
 
     const auto correctedCompletenessOrder = getCorrectedCompletenessOrder( coveringKernelFunctionIndices.size() );
     if ( correctedCompletenessOrder < 1 ) {
-        throw std::runtime_error( MakeString() << __PRETTY_FUNCTION__ << ": Corrected completeness order is less than 1" );
+      throw std::runtime_error( MakeString()
+                                << __PRETTY_FUNCTION__ << ": Corrected completeness order is less than 1" );
     }
 
     const Eigen::Map< const Eigen::VectorXd > coordVec( coord, _dim );
@@ -49,7 +50,7 @@ namespace Marmot::Meshfree {
                                                                kernelFunctionCandidates.size() );
     shapeFunctionValueGradients.setZero();
 
-    const auto M = computeMMatrix( coordVec, kernelFunctionCandidates, correctedCompletenessOrder);
+    const auto M = computeMMatrix( coordVec, kernelFunctionCandidates, correctedCompletenessOrder );
 
     // solve for b(x)
     // b = M^-1 * H0
@@ -75,11 +76,11 @@ namespace Marmot::Meshfree {
                                                                                        ->getCenterCoordinates(),
                                                                                      _dim ),
                                      coveringKernelFunctions,
-                                     correctedCompletenessOrder);
+                                     correctedCompletenessOrder );
 
       const auto phi_A = kernelFunctionCandidates[A]->computeKernelFunction( coord );
 
-      shapeFunctionValues[A] = b0.dot( H ) * phi_A;
+      shapeFunctionValues[A]               = b0.dot( H ) * phi_A;
       shapeFunctionValueGradients.col( A ) = bGrad.transpose() * H * phi_A;
     }
   }
