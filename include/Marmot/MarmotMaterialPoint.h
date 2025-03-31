@@ -67,4 +67,6 @@ public:
   virtual void getCenterDisplacement( double* displacement ) const = 0;
 
   virtual double getVolumeUndeformed() const = 0;
+
+  virtual double getDensity() const = 0;
 };
