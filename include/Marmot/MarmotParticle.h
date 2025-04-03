@@ -65,6 +65,20 @@ namespace Marmot::Meshfree {
 
     virtual ~MarmotParticle() = default;
 
+    /// Assign all the properties of the particle. The properties are stored in a double array, which is passed to the
+    /// function. The number of properties is passed as an argument. The properties need to be follow the
+    /// order of the property names returned by the getPropertyNames() function.
+    virtual void setProperties( const double* properties, int nProperties ) = 0;
+
+    /// Assign a single property of the particle. The property is stored in a double array, which is passed to the
+    /// function.
+    virtual void setProperty( const std::string& propertyName, const double* property ) = 0;
+
+    /// Get the names of all the valid properties of the particle.
+    /// Also, the order of the properties is important, as it is used to assign the properties in the
+    /// assignProperties function.
+    virtual std::vector< std::string > getPropertyNames() const = 0;
+
     virtual void assignMeshfreeKernelFunctions(
       const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctions ) = 0;
 
