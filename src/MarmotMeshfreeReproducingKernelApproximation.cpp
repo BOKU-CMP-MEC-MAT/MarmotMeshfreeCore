@@ -1,4 +1,5 @@
 #include "Marmot/MarmotMeshfreeReproducingKernelApproximation.h"
+#include "Marmot/MarmotJournal.h"
 #include "Marmot/MarmotMeshfreeKernelFunction.h"
 #include <Eigen/Core>
 #include <Eigen/Dense>
@@ -247,13 +248,17 @@ namespace Marmot::Meshfree {
       coveringKernelFunctions.push_back( kernelFunctionCandidates[idx] );
 
     const auto correctedCompletenessOrder = getCorrectedCompletenessOrder( coveringKernelFunctionIndices.size() );
+    if ( correctedCompletenessOrder < 1 ) {
+      throw std::runtime_error( MakeString()
+                                << __PRETTY_FUNCTION__ << ": Corrected completeness order is less than 1" );
+    }
 
     const Eigen::Map< const Eigen::VectorXd > coordVec( coord, _dim );
     const auto                                sizeH = computeSizeHVector( correctedCompletenessOrder, _dim );
 
     Eigen::Map< Eigen::MatrixXd > shapeFunctionValueGradients( shapeFunctionValueGradients_,
                                                                _dim,
-                                                               coveringKernelFunctionIndices.size() );
+                                                               kernelFunctionCandidates.size() );
 
     const auto [M, MGradients] = computeMMatrixAndGradient( coordVec,
                                                             coveringKernelFunctions,
@@ -266,6 +271,10 @@ namespace Marmot::Meshfree {
     const auto MHr = M.colPivHouseholderQr();
 
     const Eigen::VectorXd b = MHr.solve( H0 );
+
+    // set all shape function values to zero
+    Eigen::Map< Eigen::VectorXd > shapeFunctionValues_( shapeFunctionValues, kernelFunctionCandidates.size() );
+    shapeFunctionValues_.setZero();
 
     shapeFunctionValueGradients.setZero();
 
@@ -286,8 +295,8 @@ namespace Marmot::Meshfree {
 
       shapeFunctionValues[A] = b.dot( H ) * phi_A;
 
-      const Eigen::MatrixXd MInv_HGrad = MHr.solve( HGradient );
-      const Eigen::VectorXd MInv_H     = MHr.solve( H );
+      // const Eigen::MatrixXd MInv_HGrad = MHr.solve( HGradient );
+      // const Eigen::VectorXd MInv_H     = MHr.solve( H );
 
       // let's compute the gradient of the shape function
       // dPsiA_dxi = H0_J * ( InvM_JK * H_K * phi_A ),xi
@@ -300,14 +309,13 @@ namespace Marmot::Meshfree {
       //                      InvM_JK                            * H_K,xi * phi_A +
       //                      InvM_JK                            * H_K    * phi_A,xi )
 
-      // we exploit the fact that H0 = 1 for idx = 0, and 0 otherwise
-      // so really we never need to compute the dot product with H0, which involves a lot of zeros
-
-      shapeFunctionValueGradients.col( A ) += MInv_HGrad.row( 0 ) * phi_A;
-      shapeFunctionValueGradients.col( A ) += MInv_H( 0 ) * phiGradient_A;
+      Eigen::MatrixXd bGradient = Eigen::MatrixXd::Zero( sizeH, _dim );
       for ( int i = 0; i < _dim; i++ ) {
-        shapeFunctionValueGradients( i, A ) += ( -MHr.solve( MGradients[i] ) * MInv_H )( 0 ) * phi_A;
+        bGradient.col( i ) = -b.transpose() * MHr.solve( MGradients[i] ).transpose();
       }
+      shapeFunctionValueGradients.col( A ) += bGradient.transpose() * H * phi_A;
+      shapeFunctionValueGradients.col( A ) += b.dot( H ) * phiGradient_A;
+      shapeFunctionValueGradients.col( A ) += ( b.transpose() * HGradient ) * phi_A;
     }
   }
 
