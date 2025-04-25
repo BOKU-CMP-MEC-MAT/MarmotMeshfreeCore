@@ -26,7 +26,7 @@
  * ---------------------------------------------------------------------
  */
 #pragma once
-#include "Marmot/MarmotMaterialPoint.h"
+// #include "Marmot/MarmotMaterialPoint.h"
 #include "Marmot/MarmotMeshfreeApproximation.h"
 #include "Marmot/MarmotParticle.h"
 #include <string>
@@ -42,21 +42,31 @@ namespace MarmotLibrary {
   class MarmotParticleFactory {
   public:
     using particleFactoryFunction =
-      Marmot::Meshfree::MarmotParticle* (*)( int                                                  particleNumber,
-                                             const double*                                        vertexCoordinates,
-                                             int                                                  sizeVertexCoordinates,
-                                             double                                               volume,
-                                             MarmotMaterialPoint&                                 mp,
+      Marmot::Meshfree::MarmotParticle* (*)( int           particleNumber,
+                                             const double* vertexCoordinates,
+                                             int           sizeVertexCoordinates,
+                                             double        volume,
+                                             // MarmotMaterialPoint&                                 mp,
+                                             //
+                                             const std::string& materialName,
+                                             const double*      materialProperties,
+                                             int                nMaterialProperties,
+
                                              const Marmot::Meshfree::MarmotMeshfreeApproximation& approximation );
     MarmotParticleFactory() = delete;
 
     static Marmot::Meshfree::MarmotParticle* createParticle(
-      const std::string&                                   particleName,
-      int                                                  materialNumber,
-      const double*                                        vertexCoordinates,
-      int                                                  sizeVertexCoordinates,
-      double                                               volume,
-      MarmotMaterialPoint&                                 mp,
+      const std::string& particleName,
+      int                materialNumber,
+      const double*      vertexCoordinates,
+      int                sizeVertexCoordinates,
+      double             volume,
+      // MarmotMaterialPoint&                                 mp,
+      //
+      const std::string& materialName,
+      const double*      materialProperties,
+      int                nMaterialProperties,
+
       const Marmot::Meshfree::MarmotMeshfreeApproximation& approximation );
 
     static bool registerParticle( const std::string& particleName, particleFactoryFunction factoryFunction );

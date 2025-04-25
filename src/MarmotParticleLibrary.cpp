@@ -60,19 +60,28 @@ namespace MarmotLibrary {
   }
 
   Marmot::Meshfree::MarmotParticle* MarmotParticleFactory::createParticle(
-    const std::string&                                   particleName,
-    int                                                  particleNumber,
-    const double*                                        vertexCoordinates,
-    int                                                  sizeVertexCoordinates,
-    double                                               volume,
-    MarmotMaterialPoint&                                 mp,
+    const std::string& particleName,
+    int                particleNumber,
+    const double*      vertexCoordinates,
+    int                sizeVertexCoordinates,
+    double             volume,
+    // MarmotMaterialPoint&                                 mp,
+    const std::string&                                   materialName,
+    const double*                                        materialProperties,
+    int                                                  sizeMaterialProperties,
     const Marmot::Meshfree::MarmotMeshfreeApproximation& approximation )
   {
     const auto particleNameUpperCase = makeStringUpperCase_( particleName );
 
     try {
-      return particleFactoryFunctionByName.at(
-        particleNameUpperCase )( particleNumber, vertexCoordinates, sizeVertexCoordinates, volume, mp, approximation );
+      return particleFactoryFunctionByName.at( particleNameUpperCase )( particleNumber,
+                                                                        vertexCoordinates,
+                                                                        sizeVertexCoordinates,
+                                                                        volume,
+                                                                        materialName,
+                                                                        materialProperties,
+                                                                        sizeMaterialProperties,
+                                                                        approximation );
     }
     catch ( const std::out_of_range& e ) {
       throw std::invalid_argument( MakeString() << "Invalid particle " << particleName << " requested!" );
