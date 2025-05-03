@@ -53,7 +53,7 @@ namespace Marmot::Meshfree {
                                             int                    idx,
                                             int                    dim );
 
-    static constexpr int computeSizeHVector( int completenessOrder, int dim );
+    static int computeSizeHVector( int completenessOrder, int dim );
 
     static Eigen::VectorXd computeHVector(
       const Eigen::VectorXd&                                    globalCoord,

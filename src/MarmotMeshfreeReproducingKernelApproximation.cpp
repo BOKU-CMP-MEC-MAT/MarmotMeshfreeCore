@@ -14,7 +14,7 @@ namespace Marmot::Meshfree {
   {
   }
 
-  constexpr int MarmotMeshfreeReproducingKernelApproximation::computeSizeHVector( int completenessOrder, int dim )
+  int MarmotMeshfreeReproducingKernelApproximation::computeSizeHVector( int completenessOrder, int dim )
   {
     // compute the size of the H vector based on the completeness order and the dimension
     // for Eq. (3.67) in the book by Belytschko, Chen, Hillman.
@@ -248,13 +248,13 @@ namespace Marmot::Meshfree {
       coveringKernelFunctions.push_back( kernelFunctionCandidates[idx] );
 
     const auto correctedCompletenessOrder = getCorrectedCompletenessOrder( coveringKernelFunctionIndices.size() );
-    if ( correctedCompletenessOrder < 1 ) {
-      throw std::runtime_error( MakeString()
-                                << __PRETTY_FUNCTION__ << ": Corrected completeness order is less than 1" );
-    }
 
     const Eigen::Map< const Eigen::VectorXd > coordVec( coord, _dim );
     const auto                                sizeH = computeSizeHVector( correctedCompletenessOrder, _dim );
+
+    if ( sizeH < 1 ) {
+      throw std::runtime_error( "Size of H vector is less than 1" );
+    }
 
     Eigen::Map< Eigen::MatrixXd > shapeFunctionValueGradients( shapeFunctionValueGradients_,
                                                                _dim,

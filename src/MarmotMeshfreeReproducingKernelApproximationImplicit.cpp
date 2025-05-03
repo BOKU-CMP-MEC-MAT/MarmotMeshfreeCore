@@ -35,9 +35,11 @@ namespace Marmot::Meshfree {
       coveringKernelFunctions.push_back( kernelFunctionCandidates[idx] );
 
     const auto correctedCompletenessOrder = getCorrectedCompletenessOrder( coveringKernelFunctionIndices.size() );
-    if ( correctedCompletenessOrder < 1 ) {
-      throw std::runtime_error( MakeString()
-                                << __PRETTY_FUNCTION__ << ": Corrected completeness order is less than 1" );
+
+    const auto sizeH = computeSizeHVector( correctedCompletenessOrder, _dim );
+
+    if ( sizeH < 1 ) {
+      throw std::runtime_error( "Size of H vector is less than 1" );
     }
 
     const Eigen::Map< const Eigen::VectorXd > coordVec( coord, _dim );
