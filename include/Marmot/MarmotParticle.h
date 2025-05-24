@@ -157,38 +157,28 @@ namespace Marmot::Meshfree {
     /**
      * We also implement the Variationally Consistent Integration (VCI)
      * according to the work of Chen, Hillman and Rueter (2013). The VCI method is used to modify the test functions by
-     * adding correction terms. These correction terms are computed globally from xi_Ii = - ( <Psi_I,i>_V - <Psi_I
-     * n_i>_S ) / <R_I>_V
-     *
-     * a larger number of correction terms can be computed, which allows to satisfy higher order galerkin exactness
-     * conditions.
-     *
-     *
-     * Therein,
-     * <Psi_I,i>_V is the volume integral of the gradient of the test function Psi_I
-     * <Psi_I n_i>_S is the surface integral of the test function Psi_I with normal n_i
-     * <R_I>_V is the volume integral of the kernel localization function R_I
-     *
-     * According, for computing the correction terms xi_Ii, these three integrals have to be computed.
+     * adding correction terms.
      */
 
     /// Get the number of VCI constraints
-    virtual int getNumberOfVCIConstraints() = 0;
+    virtual int vci_getNumberOfConstraints() = 0;
 
-    /// Compute the boundary integral of the test function for the constraint with index vciConstraint
-    virtual void computeTestFunctionBoundaryIntegral( double*       fInt,
+    /// Compute the boundary integral of the test function for all constraints
+    virtual void vci_compute_Test_P_BoundaryIntegral( double*       R_AiC_RowMajor,
                                                       const double* boundarySurfaceVector,
-                                                      int           boundaryFaceID,
-                                                      int           vciConstraint ) = 0;
+                                                      int           boundaryFaceID ) = 0;
 
-    /// Compute the volume integral of the gradient of the test function for the constraint with index vciConstraint
-    virtual void computeTestFuntionGradientVolumeIntegral( double* fInt, int vciConstraint ) = 0;
+    /// Compute the volume integral of the gradient of the test function for all constraints
+    virtual void vci_compute_TestGradient_P_Integral( double* R_AiC_RowMajow ) = 0;
 
-    /// Compute the kernel localization integral for the constraint with index vciConstraint
-    virtual void computeKernelLocalizationIntegral( double* fInt, int vciConstraint ) = 0;
+    /// Compute the kernel localization integral for all constraints
+    virtual void vci_compute_Test_PGradient_Integral( double* R_AiC_RowMajor ) = 0;
 
-    /// Assign the correction terms to the shape functions for the constraint with index vciConstraint
-    virtual void assignShapeFunctionCorrectionTerms( const double* correctionTerms, int vciConstraint ) = 0;
+    /// Compute the kernel localization integral for all constraints
+    virtual void vci_compute_MMatrix( double* M_ACD_RowMajor ) = 0;
+
+    /// Assign the correction terms to the test (shape) functions for all constraints
+    virtual void vci_assignTestFunctionCorrectionTerms( const double* eta_AiC_RowMajor ) = 0;
   };
 
 } // namespace Marmot::Meshfree
