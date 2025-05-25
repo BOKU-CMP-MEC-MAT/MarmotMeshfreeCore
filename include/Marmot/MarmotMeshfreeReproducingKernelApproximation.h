@@ -41,19 +41,19 @@ namespace Marmot::Meshfree {
     int _dim;
     int _desiredCompletenessOrder;
 
-    int static computeHRecursively( int                    completenessOrder,
-                                    const Eigen::VectorXd& x_minus_center,
-                                    Eigen::VectorXd&       res,
-                                    int                    idx,
-                                    int                    dim );
+    // int static computeHRecursively( int                    completenessOrder,
+    //                                 const Eigen::VectorXd& x_minus_center,
+    //                                 Eigen::VectorXd&       res,
+    //                                 int                    idx,
+    //                                 int                    dim );
 
-    int static computeHGradientRecursively( int                    completenessOrder,
-                                            const Eigen::VectorXd& x_minus_center,
-                                            Eigen::MatrixXd&       res,
-                                            int                    idx,
-                                            int                    dim );
+    // int static computeHGradientRecursively( int                    completenessOrder,
+    //                                         const Eigen::VectorXd& x_minus_center,
+    //                                         Eigen::MatrixXd&       res,
+    //                                         int                    idx,
+    //                                         int                    dim );
 
-    static int computeSizeHVector( int completenessOrder, int dim );
+    // static int computeSizeHVector( int completenessOrder, int dim );
 
     static Eigen::VectorXd computeHVector(
       const Eigen::VectorXd&                                    globalCoord,

@@ -1,5 +1,5 @@
 #include "Marmot/MarmotMeshfreeReproducingKernelApproximationImplicit.h"
-#include "Marmot/MarmotJournal.h"
+#include "Marmot/MarmotMonomialBasisFunctions.h"
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include <Eigen/src/Core/Matrix.h>
@@ -36,7 +36,7 @@ namespace Marmot::Meshfree {
 
     const auto correctedCompletenessOrder = getCorrectedCompletenessOrder( coveringKernelFunctionIndices.size() );
 
-    const auto sizeH = computeSizeHVector( correctedCompletenessOrder, _dim );
+    const auto sizeH = Math::computeSizeOfMonomialBasisVector( correctedCompletenessOrder, _dim );
 
     if ( sizeH < 1 ) {
       throw std::runtime_error( "Size of H vector is less than 1" );

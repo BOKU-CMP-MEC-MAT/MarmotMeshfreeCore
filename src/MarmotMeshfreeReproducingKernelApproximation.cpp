@@ -1,6 +1,6 @@
 #include "Marmot/MarmotMeshfreeReproducingKernelApproximation.h"
-#include "Marmot/MarmotJournal.h"
 #include "Marmot/MarmotMeshfreeKernelFunction.h"
+#include "Marmot/MarmotMonomialBasisFunctions.h"
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include <Eigen/src/Core/Matrix.h>
@@ -14,77 +14,16 @@ namespace Marmot::Meshfree {
   {
   }
 
-  int MarmotMeshfreeReproducingKernelApproximation::computeSizeHVector( int completenessOrder, int dim )
-  {
-    // compute the size of the H vector based on the completeness order and the dimension
-    // for Eq. (3.67) in the book by Belytschko, Chen, Hillman.
-
-    int size = 0;
-    for ( int i = 0; i <= completenessOrder; i++ ) {
-      if ( dim == 1 )
-        size += 1;
-      else
-        size += computeSizeHVector( completenessOrder - i, dim - 1 );
-    }
-    return size;
-  }
-
-  int MarmotMeshfreeReproducingKernelApproximation::computeHRecursively( int                    completenessOrder,
-                                                                         const Eigen::VectorXd& x_minus_xI,
-                                                                         Eigen::VectorXd&       res,
-                                                                         int                    idxEnd,
-                                                                         int                    dim )
-  {
-    for ( int i = 0; i <= completenessOrder; i++ ) {
-
-      const int idxStart = idxEnd;
-      if ( dim > 1 )
-        idxEnd = computeHRecursively( completenessOrder - i, x_minus_xI, res, idxEnd, dim - 1 );
-      else {
-        idxEnd++;
-      }
-
-      for ( int idx = idxStart; idx < idxEnd; idx++ )
-        res( idx ) *= std::pow( x_minus_xI[dim - 1], i );
-    }
-    return idxEnd;
-  }
-
-  int MarmotMeshfreeReproducingKernelApproximation::computeHGradientRecursively( int completenessOrder,
-                                                                                 const Eigen::VectorXd& x_minus_xI,
-                                                                                 Eigen::MatrixXd&       res,
-                                                                                 int                    idxEnd,
-                                                                                 int                    dim )
-  {
-    for ( int i = 0; i <= completenessOrder; i++ ) {
-
-      const int idxStart = idxEnd;
-
-      if ( dim > 1 )
-        idxEnd = computeHGradientRecursively( completenessOrder - i, x_minus_xI, res, idxEnd, dim - 1 );
-      else {
-        idxEnd++;
-      }
-      for ( int idx = idxStart; idx < idxEnd; idx++ ) {
-        if ( i > 0 )
-          res( idx, dim - 1 ) = i * std::pow( x_minus_xI[dim - 1], i - 1 );
-        else
-          res( idx, dim - 1 ) = 0;
-      }
-    }
-    return idxEnd;
-  }
-
   Eigen::VectorXd MarmotMeshfreeReproducingKernelApproximation::computeHVector(
     const Eigen::VectorXd&                                    x_minus_xI,
     const std::vector< const MarmotMeshfreeKernelFunction* >& coveringShapeFunctions,
     const int                                                 completenessOrder )
   {
-    const auto _sizeH = computeSizeHVector( completenessOrder, x_minus_xI.size() );
+    const auto _sizeH = Math::computeSizeOfMonomialBasisVector( completenessOrder, x_minus_xI.size() );
 
     Eigen::VectorXd res = Eigen::VectorXd::Ones( _sizeH );
 
-    computeHRecursively( completenessOrder, x_minus_xI, res, 0, x_minus_xI.size() );
+    Math::computeMonomialBasis( completenessOrder, x_minus_xI, res );
 
     return res;
   }
@@ -94,11 +33,11 @@ namespace Marmot::Meshfree {
     const std::vector< const MarmotMeshfreeKernelFunction* >& coveringShapeFunctions,
     const int                                                 completenessOrder )
   {
-    const auto _sizeH = computeSizeHVector( completenessOrder, x_minus_xI.size() );
+    const auto _sizeH = Math::computeSizeOfMonomialBasisVector( completenessOrder, x_minus_xI.size() );
 
     Eigen::MatrixXd res = Eigen::MatrixXd::Ones( _sizeH, x_minus_xI.size() );
 
-    computeHGradientRecursively( completenessOrder, x_minus_xI, res, 0, x_minus_xI.size() );
+    Math::computeMonomialBasisGradient( completenessOrder, x_minus_xI, res );
 
     return res;
   }
@@ -115,7 +54,7 @@ namespace Marmot::Meshfree {
     const std::vector< const MarmotMeshfreeKernelFunction* >& coveringShapeFunctions,
     int                                                       completenessOrder )
   {
-    const auto _sizeH = computeSizeHVector( completenessOrder, globalCoord.size() );
+    const auto _sizeH = Math::computeSizeOfMonomialBasisVector( completenessOrder, globalCoord.size() );
 
     Eigen::MatrixXd M = Eigen::MatrixXd::Zero( _sizeH, _sizeH );
 
@@ -138,7 +77,7 @@ namespace Marmot::Meshfree {
   {
 
     const int  _dim   = globalCoord.size();
-    const auto _sizeH = computeSizeHVector( completenessOrder, _dim );
+    const auto _sizeH = Math::computeSizeOfMonomialBasisVector( completenessOrder, _dim );
 
     Eigen::MatrixXd                M = Eigen::MatrixXd::Zero( _sizeH, _sizeH );
     std::vector< Eigen::MatrixXd > MGradients( _dim );
@@ -250,7 +189,7 @@ namespace Marmot::Meshfree {
     const auto correctedCompletenessOrder = getCorrectedCompletenessOrder( coveringKernelFunctionIndices.size() );
 
     const Eigen::Map< const Eigen::VectorXd > coordVec( coord, _dim );
-    const auto                                sizeH = computeSizeHVector( correctedCompletenessOrder, _dim );
+    const auto sizeH = Math::computeSizeOfMonomialBasisVector( correctedCompletenessOrder, _dim );
 
     if ( sizeH < 1 ) {
       throw std::runtime_error( "Size of H vector is less than 1" );
