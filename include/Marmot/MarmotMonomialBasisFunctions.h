@@ -95,13 +95,13 @@ namespace Marmot::Math {
 
   inline void computeMonomialBasis( int order, const Eigen::VectorXd& x, Eigen::VectorXd& res )
   {
-    res.setZero();
+    res.setOnes();
     _computeMonomialBasisRecursion( order, x, res, 0, x.size() );
   }
 
   inline void computeMonomialBasisGradient( int order, const Eigen::VectorXd& x, Eigen::MatrixXd& res )
   {
-    res.setZero();
+    res.setOnes();
     _computeMonomialBasisGradientRecursion( order, x, res, 0, x.size() );
   }
 
