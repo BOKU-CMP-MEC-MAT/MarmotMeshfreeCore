@@ -154,6 +154,12 @@ namespace Marmot::Meshfree {
 
     virtual const std::unordered_map< std::string, int >& getSupportedDistributedLoadTypes() const = 0;
 
+    /// Get the coordinates of the vertices of the particle (e.g., the nodes of a tetrahedron) for testing the coverage
+    /// of the particle by shape functions.
+    virtual void getEvaluationCoordinates( double* coordinates ) const = 0;
+
+    virtual int getNumberOfEvaluationPoints() const = 0;
+
     /**
      * We also implement the Variationally Consistent Integration (VCI)
      * according to the work of Chen, Hillman and Rueter (2013). The VCI method is used to modify the test functions by
