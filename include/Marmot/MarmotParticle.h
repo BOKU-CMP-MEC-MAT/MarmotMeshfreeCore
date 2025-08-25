@@ -123,16 +123,6 @@ namespace Marmot::Meshfree {
                                         double        timeNew,
                                         double        dT ) = 0;
 
-    virtual void computeConsistentInertia( double* I )
-    {
-      throw std::invalid_argument( "This particle does not support inertia computations" );
-    };
-
-    virtual void computeLumpedInertia( double* I )
-    {
-      throw std::invalid_argument( "This particle does not support inertia computations" );
-    };
-
     virtual void computeBodyLoad( int           type,
                                   const double* load,
                                   double*       fExt,
