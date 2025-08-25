@@ -96,6 +96,8 @@ namespace Marmot::Meshfree {
 
     virtual int getNumberOfVertices() const = 0;
 
+    virtual double getVolumeUndeformed() const = 0;
+
     /// Get the shape of the material point (e.g., point, line, triangle, tetrahedron) in Ensight Gold notation
     virtual std::string getParticleShape() const = 0;
 
@@ -143,6 +145,12 @@ namespace Marmot::Meshfree {
     virtual const std::unordered_map< std::string, int >& getSupportedBodyLoadTypes() const = 0;
 
     virtual const std::unordered_map< std::string, int >& getSupportedDistributedLoadTypes() const = 0;
+
+    /// Get the coordinates of the vertices of the particle (e.g., the nodes of a tetrahedron) for testing the coverage
+    /// of the particle by shape functions.
+    virtual void getEvaluationCoordinates( double* coordinates ) const = 0;
+
+    virtual int getNumberOfEvaluationPoints() const = 0;
 
     /**
      * We also implement the Variationally Consistent Integration (VCI)
