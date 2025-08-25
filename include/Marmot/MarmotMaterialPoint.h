@@ -29,7 +29,6 @@
 #include "Marmot/MarmotElementProperty.h"
 #include "Marmot/MarmotUtils.h"
 #include <string>
-#include <vector>
 
 class MarmotMaterialPoint {
 
@@ -68,5 +67,5 @@ public:
 
   virtual double getVolumeUndeformed() const = 0;
 
-  virtual double getDensity() const = 0;
+  virtual double getDensityUndeformed() const = 0;
 };
