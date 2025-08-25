@@ -96,6 +96,8 @@ namespace Marmot::Meshfree {
 
     virtual int getNumberOfVertices() const = 0;
 
+    virtual double getVolumeUndeformed() const = 0;
+
     /// Get the shape of the material point (e.g., point, line, triangle, tetrahedron) in Ensight Gold notation
     virtual std::string getParticleShape() const = 0;
 
