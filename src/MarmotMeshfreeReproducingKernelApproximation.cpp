@@ -42,6 +42,30 @@ namespace Marmot::Meshfree {
     return res;
   }
 
+  void MarmotMeshfreeReproducingKernelApproximation::computeHVectorInto( const Eigen::VectorXd& x_minus_xI,
+                                                                         const int              completenessOrder,
+                                                                         Eigen::VectorXd&       res )
+  {
+    const auto _sizeH = Math::computeSizeOfMonomialBasisVector( completenessOrder, x_minus_xI.size() );
+
+    if ( res.size() != _sizeH )
+      res.resize( _sizeH );
+
+    Math::computeMonomialBasis( completenessOrder, x_minus_xI, res );
+  }
+
+  void MarmotMeshfreeReproducingKernelApproximation::computeHVectorGradientInto( const Eigen::VectorXd& x_minus_xI,
+                                                                                 const int        completenessOrder,
+                                                                                 Eigen::MatrixXd& res )
+  {
+    const auto _sizeH = Math::computeSizeOfMonomialBasisVector( completenessOrder, x_minus_xI.size() );
+
+    if ( res.rows() != _sizeH || res.cols() != x_minus_xI.size() )
+      res.resize( _sizeH, x_minus_xI.size() );
+
+    Math::computeMonomialBasisGradient( completenessOrder, x_minus_xI, res );
+  }
+
   Eigen::VectorXd MarmotMeshfreeReproducingKernelApproximation::H0Vector( int sizeHVector )
   {
     Eigen::VectorXd H0 = Eigen::VectorXd::Zero( sizeHVector );
@@ -114,7 +138,10 @@ namespace Marmot::Meshfree {
     const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctionCandidates,
     double*                                                   shapeFunctionValues ) const
   {
-    const auto coveringKernelFunctionsIndices = findCoveringKernelFunctionIndices( coord, kernelFunctionCandidates );
+    std::vector< double > coveringKernelValues;
+    const auto            coveringKernelFunctionsIndices = findCoveringKernelFunctionIndices( coord,
+                                                                                   kernelFunctionCandidates,
+                                                                                   coveringKernelValues );
 
     const auto correctedCompletenessOrder = getCorrectedCompletenessOrder( coveringKernelFunctionsIndices.size() );
 
@@ -125,7 +152,29 @@ namespace Marmot::Meshfree {
     /* // MAp: */
     const Eigen::Map< const Eigen::VectorXd > coordVec( coord, _dim );
 
-    const auto M = computeMMatrix( coordVec, coveringKernelFunctions, correctedCompletenessOrder );
+    const auto sizeH = Math::computeSizeOfMonomialBasisVector( correctedCompletenessOrder, _dim );
+
+    // The moment matrix is assembled here rather than through computeMMatrix() so that the basis
+    // vector and the per-kernel temporaries can be hoisted out of the loop and the kernel values
+    // already obtained above can be reused. The arithmetic is the same.
+    const size_t nCovering = coveringKernelFunctionsIndices.size();
+
+    Eigen::MatrixXd M = Eigen::MatrixXd::Zero( sizeH, sizeH );
+
+    Eigen::VectorXd x_minus_center( _dim );
+    Eigen::VectorXd H( sizeH );
+    Eigen::MatrixXd HxHT( sizeH, sizeH );
+
+    for ( size_t k = 0; k < nCovering; k++ ) {
+      const auto* kf = coveringKernelFunctions[k];
+
+      x_minus_center = coordVec - Eigen::Map< const Eigen::VectorXd >( kf->getCenterCoordinates(), _dim );
+
+      computeHVectorInto( x_minus_center, correctedCompletenessOrder, H );
+
+      HxHT.noalias() = H * H.transpose();
+      M += HxHT * coveringKernelValues[k];
+    }
 
     // solve for b(x)
     // b = M^-1 * H0
@@ -138,17 +187,15 @@ namespace Marmot::Meshfree {
     for ( int A = 0; A < static_cast< int >( kernelFunctionCandidates.size() ); A++ )
       shapeFunctionValues[A] = 0;
 
-    for ( const auto& A : coveringKernelFunctionsIndices ) {
+    for ( size_t k = 0; k < nCovering; k++ ) {
+      const int A = coveringKernelFunctionsIndices[k];
 
-      const auto phi_A = kernelFunctionCandidates[A]->computeKernelFunction( coord );
+      x_minus_center = coordVec -
+                       Eigen::Map< const Eigen::VectorXd >( kernelFunctionCandidates[A]->getCenterCoordinates(), _dim );
 
-      const auto H = computeHVector( coordVec - Eigen::Map< const Eigen::VectorXd >( kernelFunctionCandidates[A]
-                                                                                       ->getCenterCoordinates(),
-                                                                                     _dim ),
-                                     coveringKernelFunctions,
-                                     correctedCompletenessOrder );
+      computeHVectorInto( x_minus_center, correctedCompletenessOrder, H );
 
-      shapeFunctionValues[A] = b.dot( H ) * phi_A;
+      shapeFunctionValues[A] = b.dot( H ) * coveringKernelValues[k];
     }
   }
 
@@ -174,13 +221,37 @@ namespace Marmot::Meshfree {
     return coveringFunctionsIndices;
   }
 
+  const std::vector< int > MarmotMeshfreeReproducingKernelApproximation::findCoveringKernelFunctionIndices(
+    const double*                                             coord,
+    const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctions,
+    std::vector< double >&                                    coveringKernelValues ) const
+
+  {
+    std::vector< int > coveringFunctionsIndices;
+
+    coveringKernelValues.clear();
+
+    for ( int i = 0; i < static_cast< int >( kernelFunctions.size() ); i++ ) {
+      const double phi = kernelFunctions[i]->computeKernelFunction( coord );
+      if ( std::abs( phi ) > 1e-14 ) {
+        coveringFunctionsIndices.push_back( i );
+        coveringKernelValues.push_back( phi );
+      }
+    }
+
+    return coveringFunctionsIndices;
+  }
+
   void MarmotMeshfreeReproducingKernelApproximation::computeShapeFunctionsAndGradients(
     const double*                                             coord,
     const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctionCandidates,
     double*                                                   shapeFunctionValues,
     double*                                                   shapeFunctionValueGradients_ ) const
   {
-    const auto coveringKernelFunctionIndices = findCoveringKernelFunctionIndices( coord, kernelFunctionCandidates );
+    std::vector< double > coveringKernelValues;
+    const auto            coveringKernelFunctionIndices = findCoveringKernelFunctionIndices( coord,
+                                                                                  kernelFunctionCandidates,
+                                                                                  coveringKernelValues );
 
     std::vector< const MarmotMeshfreeKernelFunction* > coveringKernelFunctions;
     for ( const auto& idx : coveringKernelFunctionIndices )
@@ -201,41 +272,52 @@ namespace Marmot::Meshfree {
 
     // Per-covering-kernel quantities are computed once here and reused for both the moment-matrix
     // assembly and the final shape-function/gradient evaluation, instead of being recomputed twice.
-    const size_t                   nCovering = coveringKernelFunctionIndices.size();
-    std::vector< Eigen::VectorXd > H_cache( nCovering );
-    std::vector< Eigen::MatrixXd > HGradient_cache( nCovering );
-    std::vector< double >          phi_cache( nCovering );
-    std::vector< Eigen::VectorXd > phiGradient_cache( nCovering );
+    //
+    // The caches are contiguous blocks with one column per covering kernel rather than vectors of
+    // individually heap-allocated Eigen objects, and every temporary in the loop below is hoisted
+    // out of it. Both matter: this loop runs once per covering kernel per evaluation point, which
+    // is the innermost work in the whole reconstruction, and each allocation there costs more than
+    // the arithmetic it carries. The arithmetic itself is unchanged.
+    const size_t nCovering = coveringKernelFunctionIndices.size();
+
+    Eigen::MatrixXd       H_cache( sizeH, nCovering );
+    Eigen::MatrixXd       HGradient_cache( sizeH * _dim, nCovering );
+    Eigen::MatrixXd       phiGradient_cache( _dim, nCovering );
+    std::vector< double > phi_cache( nCovering );
 
     Eigen::MatrixXd                M = Eigen::MatrixXd::Zero( sizeH, sizeH );
     std::vector< Eigen::MatrixXd > MGradients( _dim, Eigen::MatrixXd::Zero( sizeH, sizeH ) );
 
+    Eigen::VectorXd x_minus_center( _dim );
+    Eigen::VectorXd phiGradient( _dim );
+    Eigen::VectorXd H( sizeH );
+    Eigen::MatrixXd HGradient( sizeH, _dim );
+    Eigen::MatrixXd HxHT( sizeH, sizeH );
+    Eigen::MatrixXd HGrad_i_xHT( sizeH, sizeH );
+
     for ( size_t k = 0; k < nCovering; k++ ) {
       const auto* kf = coveringKernelFunctions[k];
 
-      const Eigen::VectorXd x_minus_center = coordVec -
-                                             Eigen::Map< const Eigen::VectorXd >( kf->getCenterCoordinates(), _dim );
+      x_minus_center = coordVec - Eigen::Map< const Eigen::VectorXd >( kf->getCenterCoordinates(), _dim );
 
-      const double phi = kf->computeKernelFunction( coord );
-      Eigen::VectorXd phiGradient = Eigen::VectorXd::Zero( _dim );
+      // phi was already evaluated while determining which candidates cover this coordinate.
+      const double phi = coveringKernelValues[k];
       kf->computeKernelFunctionGradient( coord, phiGradient.data() );
 
-      Eigen::VectorXd H         = computeHVector( x_minus_center, coveringKernelFunctions, correctedCompletenessOrder );
-      Eigen::MatrixXd HGradient = computeHVectorGradient( x_minus_center,
-                                                          coveringKernelFunctions,
-                                                          correctedCompletenessOrder );
+      computeHVectorInto( x_minus_center, correctedCompletenessOrder, H );
+      computeHVectorGradientInto( x_minus_center, correctedCompletenessOrder, HGradient );
 
-      const Eigen::MatrixXd HxHT = H * H.transpose();
+      HxHT.noalias() = H * H.transpose();
       M += HxHT * phi;
       for ( int i = 0; i < _dim; i++ ) {
-        const Eigen::MatrixXd HGrad_i_xHT = HGradient.col( i ) * H.transpose();
+        HGrad_i_xHT.noalias() = HGradient.col( i ) * H.transpose();
         MGradients[i] += ( HGrad_i_xHT + HGrad_i_xHT.transpose() ) * phi + HxHT * phiGradient( i );
       }
 
-      phi_cache[k]         = phi;
-      phiGradient_cache[k] = std::move( phiGradient );
-      H_cache[k]           = std::move( H );
-      HGradient_cache[k]   = std::move( HGradient );
+      phi_cache[k]                                                                  = phi;
+      phiGradient_cache.col( k )                                                    = phiGradient;
+      H_cache.col( k )                                                              = H;
+      Eigen::Map< Eigen::MatrixXd >( HGradient_cache.col( k ).data(), sizeH, _dim ) = HGradient;
     }
 
     // solve for b(x)
@@ -274,11 +356,12 @@ namespace Marmot::Meshfree {
     const auto bGradientTransposed = bGradient.transpose();
 
     for ( size_t k = 0; k < nCovering; k++ ) {
-      const int             A           = coveringKernelFunctionIndices[k];
-      const double          phi_A       = phi_cache[k];
-      const Eigen::VectorXd& phiGradient_A = phiGradient_cache[k];
-      const Eigen::VectorXd& H             = H_cache[k];
-      const Eigen::MatrixXd& HGradient     = HGradient_cache[k];
+      const int    A     = coveringKernelFunctionIndices[k];
+      const double phi_A = phi_cache[k];
+
+      const auto                                phiGradient_A = phiGradient_cache.col( k );
+      const auto                                H             = H_cache.col( k );
+      const Eigen::Map< const Eigen::MatrixXd > HGradient( HGradient_cache.col( k ).data(), sizeH, _dim );
 
       shapeFunctionValues[A] = b.dot( H ) * phi_A;
 
