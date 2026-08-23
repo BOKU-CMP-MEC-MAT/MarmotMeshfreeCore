@@ -77,6 +77,29 @@ namespace Marmot::Meshfree {
 
     static Eigen::VectorXd H0Vector( int sizeHVector );
 
+    /**
+     * @brief Out-parameter form of computeHVector, sizing @p res only when it does not already fit.
+     *
+     * The value-returning form allocates once per covering kernel function per evaluation point.
+     * In the per-kernel loops that dominates the cost, so those loops hoist @p res and call this.
+     *
+     * @param x_minus_xI The evaluation coordinate relative to the kernel function's center.
+     * @param completenessOrder The (possibly corrected) completeness order.
+     * @param res The monomial basis vector to write into.
+     */
+    static void computeHVectorInto( const Eigen::VectorXd& x_minus_xI, int completenessOrder, Eigen::VectorXd& res );
+
+    /**
+     * @brief Out-parameter form of computeHVectorGradient. See computeHVectorInto().
+     *
+     * @param x_minus_xI The evaluation coordinate relative to the kernel function's center.
+     * @param completenessOrder The (possibly corrected) completeness order.
+     * @param res The monomial basis gradient to write into.
+     */
+    static void computeHVectorGradientInto( const Eigen::VectorXd& x_minus_xI,
+                                            int                    completenessOrder,
+                                            Eigen::MatrixXd&       res );
+
     int factorial( int n ) const
     {
       if ( n == 0 )
@@ -110,6 +133,25 @@ namespace Marmot::Meshfree {
     const std::vector< int > findCoveringKernelFunctionIndices(
       const double*                                             coord,
       const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctions ) const;
+
+    /**
+     * @brief findCoveringKernelFunctionIndices, additionally handing back the kernel values it had
+     *        to evaluate anyway.
+     *
+     * The plain form discards them, so every caller then re-evaluates the kernel function for each
+     * covering candidate -- one redundant virtual call and B-spline evaluation per covering kernel
+     * per evaluation point.
+     *
+     * @param coord The evaluation coordinate.
+     * @param kernelFunctions The candidate kernel functions.
+     * @param coveringKernelValues Filled with the kernel value of each covering candidate, in the
+     *        same order as the returned indices.
+     * @return The indices of the covering candidates.
+     */
+    const std::vector< int > findCoveringKernelFunctionIndices(
+      const double*                                             coord,
+      const std::vector< const MarmotMeshfreeKernelFunction* >& kernelFunctions,
+      std::vector< double >&                                    coveringKernelValues ) const;
 
   public:
     MarmotMeshfreeReproducingKernelApproximation( int dim, int completenessOrder );
